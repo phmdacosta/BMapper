@@ -3,6 +3,7 @@ package com.phmc.bmapper;
 import com.pedrocosta.springutils.ClassUtils;
 import com.pedrocosta.springutils.output.Log;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class ObjectMapper extends TypeMapper<Object, Object> {
@@ -13,7 +14,21 @@ public class ObjectMapper extends TypeMapper<Object, Object> {
         try {
             result = MapperUtils.getInstance(resultClass);
             Class<?> fromClass = from.getClass();
-            doMapping(from, fromClass, result, resultClass);
+            doMapping(null, from, fromClass, result, resultClass);
+        } catch (Exception e) {
+            Log.warn(BMapper.class, e.getMessage());
+        }
+
+        return result;
+    }
+
+    @Override
+    protected Object map(MappingDataHelper dataHelper, Object from, Class<Object> resultClass) {
+        Object result = null;
+        try {
+            result = MapperUtils.getInstance(resultClass);
+            Class<?> fromClass = from.getClass();
+            doMapping(dataHelper, from, fromClass, result, resultClass);
         } catch (Exception e) {
             Log.warn(BMapper.class, e.getMessage());
         }
@@ -22,9 +37,18 @@ public class ObjectMapper extends TypeMapper<Object, Object> {
     }
 
     @SuppressWarnings("unchecked")
-    protected <T,F> void doMapping(F from, Class<?> fromClass, T result, Class<?> resultClass) {
-        Map<ChainPropertyDescriptor, ChainPropertyDescriptor> mappedMethods = MapperUtils.getMappedProperties(fromClass, resultClass);
-        for (Map.Entry<ChainPropertyDescriptor, ChainPropertyDescriptor> entry : mappedMethods.entrySet()) {
+    protected <T,F> void doMapping(MappingDataHelper dataHelper, F from, Class<?> fromClass, T result, Class<?> resultClass) {
+        Map<ChainPropertyDescriptor, ChainPropertyDescriptor> mappedProperties = null;
+
+        if (dataHelper != null) {
+            mappedProperties = dataHelper.getMappedObjects().get(MapperUtils.getMappingKeyName(fromClass, resultClass));
+        }
+
+        if (mappedProperties == null) {
+            mappedProperties = MapperUtils.getMappedProperties(fromClass, resultClass);
+        }
+
+        for (Map.Entry<ChainPropertyDescriptor, ChainPropertyDescriptor> entry : mappedProperties.entrySet()) {
             ChainPropertyDescriptor chainSetter = entry.getKey();
             if (chainSetter != null) {
                 try {

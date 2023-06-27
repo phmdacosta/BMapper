@@ -37,4 +37,35 @@ public class MapMapper<FROM, TO> extends TypeMapper<FROM, TO> {
 
         return result;
     }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    protected TO map(MappingDataHelper dataHelper, FROM from, Class<TO> resultClass) {
+        if (!(from instanceof Map)) {
+            throw new IllegalArgumentException("Source object is not a Map");
+        }
+
+        Map<?,?> map = (Map<?,?>) from;
+        TO result;
+        try { //Try to create
+            result = (TO) map.getClass().getDeclaredConstructor(new Class[0]).newInstance();
+            ((Map<Object,Object>) result).clear();
+        } catch (Exception e) {
+            Log.error(this, e);
+            result = (TO) new HashMap<>();
+        }
+
+        if (map.isEmpty()) {
+            return result;
+        }
+
+        //Do the mapping of elements
+        for (Map.Entry<?,?> entry : map.entrySet()) {
+            ((Map<Object,Object>) result)
+                    .put(entry.getKey(), ((TypeMapper<Object,TO>)loadMapper(entry.getValue().getClass(), resultClass))
+                            .doMapping(dataHelper, entry.getValue(), resultClass));
+        }
+
+        return result;
+    }
 }

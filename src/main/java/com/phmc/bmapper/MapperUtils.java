@@ -1,9 +1,12 @@
 package com.phmc.bmapper;
 
+import com.pedrocosta.springutils.ClassFinder;
 import com.pedrocosta.springutils.ClassUtils;
 import com.pedrocosta.springutils.output.Log;
 import com.phmc.bmapper.annotation.*;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
+import org.springframework.context.ApplicationContext;
 
 import java.beans.IntrospectionException;
 import java.lang.annotation.Annotation;
@@ -11,6 +14,7 @@ import java.lang.reflect.*;
 import java.util.*;
 
 public class MapperUtils {
+
     public static <T> T getInstance(final Class<T> clazz) {
         T result = null;
         try {
@@ -25,6 +29,51 @@ public class MapperUtils {
         return result;
     }
 
+    /**
+     * Gets all beans and their mapped target beans that are eligible for mapping.
+     *
+     * @param context   Application context
+     * @return  Map with base bean as key and target bean as value.
+     */
+    public static Map<Class<?>, Class<?>> getAllEligibleMapping(final ApplicationContext context) {
+        Map<Class<?>, Class<?>> qualifiedMapping = new HashMap<>();
+        Class<MappingClass> annotationClass = MappingClass.class;
+
+        try {
+            List<Class<?>> beans = ClassFinder.findAllByAssignable(context, annotationClass);
+            for (Class<?> bean : beans) {
+                qualifiedMapping.put(bean, bean.getAnnotation(annotationClass).targetClass());
+            }
+        } catch (ClassNotFoundException e) {
+            Log.warn(BMapper.class, String.format("Could not find any class with %s annotation",
+                    annotationClass.getSimpleName()));
+        }
+
+        return qualifiedMapping;
+    }
+
+        /**
+     * Create the mapping of all properties between to objects.
+     *
+     * @param fromClass Class of the source object to be mapped.
+     * @param toClass   Class of the target object that will be the result of the mapping.
+     * @return
+     * <br>
+     * A map with {@link ChainPropertyDescriptor} key and {@link ChainPropertyDescriptor} value,
+     * where the key has properties of the target object and the value has properties of the source object.
+     *
+     * <pre>
+     * <code>
+     * Example: <br>
+     *      Source -> Square{ height, width } <br>
+     *      Target -> SquareDTO{ height } <br>
+     *      Map -> [ <br>
+     *              key: ChainPropertyDescriptor{ SquareDTO::height }, <br>
+     *              value: ChainPropertyDescriptor{ Square::height } <br>
+     *             ]
+     * </code>
+     * <pre/>
+     */
     public static Map<ChainPropertyDescriptor, ChainPropertyDescriptor> getMappedProperties(Class<?> fromClass, Class<?> toClass) {
         Map<ChainPropertyDescriptor, ChainPropertyDescriptor> mappedMethods = new HashMap<>();
 
@@ -223,5 +272,12 @@ public class MapperUtils {
 
     public static Class<?> getTypeOfMethod(Method method) {
         return method.getParameterTypes().length > 0 ? method.getParameterTypes()[0] : method.getReturnType();
+    }
+
+    public static String getMappingKeyName(final Class<?> fromClass, final Class<?> toClass) {
+        if (fromClass == null || toClass == null) {
+            return "";
+        }
+        return fromClass.getSimpleName() + ">>" + toClass.getSimpleName();
     }
 }
