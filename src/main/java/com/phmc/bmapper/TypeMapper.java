@@ -16,13 +16,14 @@ public abstract class TypeMapper<FROM, TO> {
     }
 
     /**
-     * Deprecated. Use {@link TypeMapper#doMapping(MappingDataHelper, Object, Class)} instead.
+     * <b>Deprecated since 2023-06.</b><br>
+     * Use {@link TypeMapper#doMapping(MappingDataHelper, Object, Class)} instead.<br>
      * Map a model to a view, and vice versa.
      *
      * @param from      Object to map
      * @param toClass   Class to the target result
      */
-    @Deprecated(since = "2023-06", forRemoval = true)
+    @Deprecated
     public TO doMapping(FROM from, Class<TO> toClass) {
         if (!this.isValidParameters(from, toClass)) {
             return null;
@@ -55,9 +56,10 @@ public abstract class TypeMapper<FROM, TO> {
     }
 
     /**
-     * Deprecated. Use {@link TypeMapper#map(MappingDataHelper, Object, Class)} instead.
+     * <b>Deprecated since 2023-06.</b><br>
+     * Use {@link TypeMapper#map(MappingDataHelper, Object, Class)} instead.
      */
-    @Deprecated(since = "2023-06", forRemoval = true)
+    @Deprecated
     protected abstract TO map(FROM from, Class<TO> resultClass);
 
     protected abstract TO map(MappingDataHelper dataHelper, FROM from, Class<TO> resultClass);
