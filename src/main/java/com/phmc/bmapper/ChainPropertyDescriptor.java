@@ -5,16 +5,11 @@ import java.util.Map;
 
 public class ChainPropertyDescriptor {
     private Class<?> objClass;
-    private Map<Integer, PropertyDescriptor> chain;
+    private final Map<Integer, PropertyDescriptor> chain;
     private int size;
 
     public ChainPropertyDescriptor() {
         chain = new HashMap<>();
-    }
-
-    public ChainPropertyDescriptor(Class<?> objClass) {
-        this();
-        this.setObjClass(objClass);
     }
 
     public void setObjClass(Class<?> objClass) {

@@ -7,7 +7,7 @@ public enum MappingType {
     ANNOTATION(new AnnotationMappingLoader()),
     XML(new XmlMappingLoader());
 
-    private MappingLoader loader;
+    private final MappingLoader loader;
 
     MappingType(MappingLoader loader) {
         this.loader = loader;

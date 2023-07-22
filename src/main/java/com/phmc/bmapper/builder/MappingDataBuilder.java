@@ -5,30 +5,24 @@ import com.phmc.bmapper.utils.MapperUtils;
 import com.phmc.bmapper.utils.MappingType;
 import org.springframework.context.ApplicationContext;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 public class MappingDataBuilder {
-    private Set<MappingType> mappingTypes;
-    private boolean enableXmlMapping;
-    private boolean enableAnnotationMapping;
+    private final Set<MappingType> mappingTypes;
     private ApplicationContext context;
     private Map<String, Map<ChainPropertyDescriptor, ChainPropertyDescriptor>> mappedObjects;
 
+    public MappingDataBuilder() {
+        this.mappingTypes = new HashSet<>();
+    }
     public void addMappingTypes(MappingType mappingType) {
         this.mappingTypes.add(mappingType);
     }
 
     public void removeMappingTypes(MappingType mappingType) {
         this.mappingTypes.remove(mappingType);
-    }
-
-    public void setEnableXmlMapping(boolean enableXmlMapping) {
-        this.enableXmlMapping = enableXmlMapping;
-    }
-
-    public void setEnableAnnotationMapping(boolean enableAnnotationMapping) {
-        this.enableAnnotationMapping = enableAnnotationMapping;
     }
 
     public void setContext(ApplicationContext context) {

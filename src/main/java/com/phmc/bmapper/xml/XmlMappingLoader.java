@@ -1,7 +1,6 @@
 package com.phmc.bmapper.xml;
 
 import com.pedrocosta.springutils.output.Log;
-import com.phmc.bmapper.BMapper;
 import com.phmc.bmapper.ChainPropertyDescriptor;
 import com.phmc.bmapper.PropertyDescriptor;
 import com.phmc.bmapper.utils.MapperUtils;
@@ -17,7 +16,6 @@ import org.w3c.dom.NodeList;
 
 import java.beans.IntrospectionException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 

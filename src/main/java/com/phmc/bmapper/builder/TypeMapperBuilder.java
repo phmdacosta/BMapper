@@ -45,11 +45,8 @@ public class TypeMapperBuilder {
 
     private enum MapperType {
         DEFAULT(new MapperObjectValidator(), new ObjectMapper()),
-        @SuppressWarnings("rawtypes")
         COLLECTION(new MapperCollectionValidator(), new CollectionMapper<>()),
-        @SuppressWarnings("rawtypes")
         MAP(new MapperMapValidator(), new MapMapper<>()),
-        @SuppressWarnings("rawtypes")
         ARRAY(new MapperArrayValidator(), new ArrayMapper<>()),
         @SuppressWarnings("rawtypes")
         WRAPPER(new MapperWrapperValidator(), new WrapperMapper());

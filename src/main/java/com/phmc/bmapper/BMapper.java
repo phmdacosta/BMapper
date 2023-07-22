@@ -3,10 +3,6 @@ package com.phmc.bmapper;
 import com.phmc.bmapper.builder.MappingDataBuilder;
 import com.phmc.bmapper.builder.TypeMapperBuilder;
 import com.phmc.bmapper.exceptions.NoMappingException;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 
 import java.util.Collection;
 

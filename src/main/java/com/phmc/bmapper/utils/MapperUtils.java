@@ -5,9 +5,7 @@ import com.pedrocosta.springutils.output.Log;
 import com.phmc.bmapper.BMapper;
 import com.phmc.bmapper.ChainPropertyDescriptor;
 import com.phmc.bmapper.PropertyDescriptor;
-import com.phmc.bmapper.TypeMapper;
 import com.phmc.bmapper.annotation.*;
-import com.phmc.bmapper.builder.MappingDataBuilder;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationContext;
 
