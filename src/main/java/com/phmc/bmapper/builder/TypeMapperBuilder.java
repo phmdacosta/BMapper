@@ -1,6 +1,7 @@
 package com.phmc.bmapper.builder;
 
 import com.phmc.bmapper.*;
+import com.phmc.bmapper.utils.MapperUtils;
 import com.phmc.bmapper.validator.*;
 
 import java.lang.reflect.Field;
@@ -9,15 +10,15 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ViewMapperBuilder {
+public class TypeMapperBuilder {
 
     private final Map<MapperKey<?,?>, TypeMapper<?,?>> mappers;
 
-    public ViewMapperBuilder() {
+    public TypeMapperBuilder() {
         mappers = new HashMap<>();
     }
 
-    public ViewMapperBuilder addMapper(TypeMapper<?,?> mapper, Class<?> fromClass, Class<?> toClass) {
+    public TypeMapperBuilder addMapper(TypeMapper<?,?> mapper, Class<?> fromClass, Class<?> toClass) {
         MapperKey<?,?> key = new MapperKey<>(fromClass, toClass);
         this.mappers.put(key, mapper);
         return this;

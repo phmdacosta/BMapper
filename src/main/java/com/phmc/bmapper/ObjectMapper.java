@@ -2,8 +2,10 @@ package com.phmc.bmapper;
 
 import com.pedrocosta.springutils.ClassUtils;
 import com.pedrocosta.springutils.output.Log;
+import com.phmc.bmapper.builder.MappingDataBuilder;
+import com.phmc.bmapper.exceptions.NoMappingException;
+import com.phmc.bmapper.utils.MapperUtils;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class ObjectMapper extends TypeMapper<Object, Object> {
@@ -23,7 +25,7 @@ public class ObjectMapper extends TypeMapper<Object, Object> {
     }
 
     @Override
-    protected Object map(MappingDataHelper dataHelper, Object from, Class<Object> resultClass) {
+    protected Object map(MappingDataBuilder dataHelper, Object from, Class<Object> resultClass) {
         Object result = null;
         try {
             result = MapperUtils.getInstance(resultClass);
@@ -37,7 +39,7 @@ public class ObjectMapper extends TypeMapper<Object, Object> {
     }
 
     @SuppressWarnings("unchecked")
-    protected <T,F> void doMapping(MappingDataHelper dataHelper, F from, Class<?> fromClass, T result, Class<?> resultClass) {
+    protected <T,F> void doMapping(MappingDataBuilder dataHelper, F from, Class<?> fromClass, T result, Class<?> resultClass) {
         Map<ChainPropertyDescriptor, ChainPropertyDescriptor> mappedProperties = null;
 
         if (dataHelper != null) {
@@ -45,7 +47,7 @@ public class ObjectMapper extends TypeMapper<Object, Object> {
         }
 
         if (mappedProperties == null) {
-            mappedProperties = MapperUtils.getMappedProperties(fromClass, resultClass);
+            throw new NoMappingException("No mapping was loaded.");
         }
 
         for (Map.Entry<ChainPropertyDescriptor, ChainPropertyDescriptor> entry : mappedProperties.entrySet()) {
@@ -91,7 +93,7 @@ public class ObjectMapper extends TypeMapper<Object, Object> {
                         }
 
                         if (fieldValue != null && !ClassUtils.isSimpleProperty(fieldValue.getClass())) {
-                            fieldValue = ((TypeMapper<Object, Object>)loadMapper(fromClass, propertyDescSetter.getPropertyType())).doMapping(fieldValue, (Class<Object>) propertyDescSetter.getPropertyType());
+                            fieldValue = ((TypeMapper<Object, Object>)loadMapper(fromClass, propertyDescSetter.getPropertyType())).doMapping(dataHelper, fieldValue, (Class<Object>) propertyDescSetter.getPropertyType());
                         }
                         propertyDescSetter.getWriteMethod().invoke(instanceSetter, fieldValue);
                     }

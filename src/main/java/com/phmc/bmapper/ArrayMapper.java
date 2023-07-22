@@ -1,5 +1,7 @@
 package com.phmc.bmapper;
 
+import com.phmc.bmapper.builder.MappingDataBuilder;
+
 import java.util.Arrays;
 
 public class ArrayMapper<FROM, TO> extends TypeMapper<FROM, TO> {
@@ -17,7 +19,7 @@ public class ArrayMapper<FROM, TO> extends TypeMapper<FROM, TO> {
 
     @Override
     @SuppressWarnings("unchecked")
-    protected TO map(MappingDataHelper dataHelper, FROM from, Class<TO> resultElementClass) {
+    protected TO map(MappingDataBuilder dataHelper, FROM from, Class<TO> resultElementClass) {
         if (!from.getClass().isArray()) {
             throw new IllegalArgumentException(
                     String.format("%s is not a array", from.getClass().getSimpleName()));

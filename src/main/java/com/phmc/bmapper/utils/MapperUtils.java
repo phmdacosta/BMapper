@@ -1,10 +1,13 @@
-package com.phmc.bmapper;
+package com.phmc.bmapper.utils;
 
-import com.pedrocosta.springutils.ClassFinder;
 import com.pedrocosta.springutils.ClassUtils;
 import com.pedrocosta.springutils.output.Log;
+import com.phmc.bmapper.BMapper;
+import com.phmc.bmapper.ChainPropertyDescriptor;
+import com.phmc.bmapper.PropertyDescriptor;
+import com.phmc.bmapper.TypeMapper;
 import com.phmc.bmapper.annotation.*;
-import org.apache.logging.log4j.util.Strings;
+import com.phmc.bmapper.builder.MappingDataBuilder;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationContext;
 
@@ -30,29 +33,40 @@ public class MapperUtils {
     }
 
     /**
-     * Gets all beans and their mapped target beans that are eligible for mapping.
+     * Create the mapping of all properties between to objects.
      *
-     * @param context   Application context
-     * @return  Map with base bean as key and target bean as value.
+     * @param context       Context of application
+     * @param mappingTypes  Set of mapping types
+     * @return
+     * <br>
+     * A map with {@link ChainPropertyDescriptor} key and {@link ChainPropertyDescriptor} value,
+     * where the key has properties of the target object and the value has properties of the source object.
+     *
+     * <pre>
+     * <code>
+     * Example: <br>
+     *      Source -> Square{ height, width } <br>
+     *      Target -> SquareDTO{ height } <br>
+     *      Map -> [ <br>
+     *              key: ChainPropertyDescriptor{ SquareDTO::height }, <br>
+     *              value: ChainPropertyDescriptor{ Square::height } <br>
+     *             ]
+     * </code>
+     * <pre/>
      */
-    public static Map<Class<?>, Class<?>> getAllEligibleMapping(final ApplicationContext context) {
-        Map<Class<?>, Class<?>> qualifiedMapping = new HashMap<>();
-        Class<MappingClass> annotationClass = MappingClass.class;
-
-        try {
-            List<Class<?>> beans = ClassFinder.findAllByAssignable(context, annotationClass);
-            for (Class<?> bean : beans) {
-                qualifiedMapping.put(bean, bean.getAnnotation(annotationClass).targetClass());
-            }
-        } catch (ClassNotFoundException e) {
-            Log.warn(BMapper.class, String.format("Could not find any class with %s annotation",
-                    annotationClass.getSimpleName()));
+    public static Map<String, Map<ChainPropertyDescriptor, ChainPropertyDescriptor>> getMappedProperties(final ApplicationContext context, Set<MappingType> mappingTypes) {
+        Map<String, Map<ChainPropertyDescriptor, ChainPropertyDescriptor>> mappedObjects = new HashMap<>();
+        for (MappingType mappingType : mappingTypes) {
+            MappingLoader loader = mappingType.getLoader();
+            mappedObjects.putAll(loader.getMappedProperties(context));
         }
-
-        return qualifiedMapping;
+        return mappedObjects;
     }
 
-        /**
+    /**
+     * <b>Deprecated since 2023-07.</b><br>
+     * Use {@link MapperUtils#getMappedProperties(ApplicationContext, Set)} instead.<br>
+     *
      * Create the mapping of all properties between to objects.
      *
      * @param fromClass Class of the source object to be mapped.
@@ -74,6 +88,7 @@ public class MapperUtils {
      * </code>
      * <pre/>
      */
+    @Deprecated
     public static Map<ChainPropertyDescriptor, ChainPropertyDescriptor> getMappedProperties(Class<?> fromClass, Class<?> toClass) {
         Map<ChainPropertyDescriptor, ChainPropertyDescriptor> mappedMethods = new HashMap<>();
 
@@ -121,6 +136,36 @@ public class MapperUtils {
 
         return mappedMethods;
     }
+
+//    /**
+//     * Create the mapping of all properties between to objects.
+//     *
+//     * @param fromClass Class of the source object to be mapped.
+//     * @param toClass   Class of the target object that will be the result of the mapping.
+//     * @return
+//     * <br>
+//     * A map with {@link ChainPropertyDescriptor} key and {@link ChainPropertyDescriptor} value,
+//     * where the key has properties of the target object and the value has properties of the source object.
+//     *
+//     * <pre>
+//     * <code>
+//     * Example: <br>
+//     *      Source -> Square{ height, width } <br>
+//     *      Target -> SquareDTO{ height } <br>
+//     *      Map -> [ <br>
+//     *              key: ChainPropertyDescriptor{ SquareDTO::height }, <br>
+//     *              value: ChainPropertyDescriptor{ Square::height } <br>
+//     *             ]
+//     * </code>
+//     * <pre/>
+//     */
+//    public static Map<ChainPropertyDescriptor, ChainPropertyDescriptor> getMappedProperties(Class<?> fromClass, Class<?> toClass, Set<MappingType> mappingTypes) {
+//        Map<ChainPropertyDescriptor, ChainPropertyDescriptor> mappedProperties = new HashMap<>();
+//        for (MappingType mappingType : mappingTypes) {
+//            mappedProperties.putAll(mappingType.getLoader().getMappedProperties(fromClass, toClass));
+//        }
+//        return mappedProperties;
+//    }
 
     public static ChainPropertyDescriptor getChainPropertyFromAnnotation(Annotation annotation, Class<?> lookingClass) {
         ChainPropertyDescriptor chainedProperty = new ChainPropertyDescriptor();
@@ -262,10 +307,22 @@ public class MapperUtils {
         return annotFieldName;
     }
 
+    /**
+     * Checks if property descriptor is not null, and it's name is different from "class".
+     *
+     * @param propertyDescriptor {@linkplain PropertyDescriptor PropertyDescriptor} object
+     * @return  <b>{@code True}</b> if the param is not null and different from "class", <b>{@code false}</b> otherwise.
+     */
     public static boolean isValidPropertyDescriptor(PropertyDescriptor propertyDescriptor) {
         return propertyDescriptor != null && !"class".equals(propertyDescriptor.getName());
     }
 
+    /**
+     * Checks if property descriptor is not null, and it's name is different from "class".
+     *
+     * @param propertyDescriptor {@linkplain java.beans.PropertyDescriptor PropertyDescriptor} object
+     * @return  <b>{@code True}</b> if the param is not null and different from "class", <b>{@code false}</b> otherwise.
+     */
     public static boolean isValidPropertyDescriptor(java.beans.PropertyDescriptor propertyDescriptor) {
         return propertyDescriptor != null && !"class".equals(propertyDescriptor.getName());
     }

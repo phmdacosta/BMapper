@@ -1,6 +1,7 @@
 package com.phmc.bmapper;
 
 import com.pedrocosta.springutils.output.Log;
+import com.phmc.bmapper.builder.MappingDataBuilder;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -40,7 +41,7 @@ public class MapMapper<FROM, TO> extends TypeMapper<FROM, TO> {
 
     @Override
     @SuppressWarnings("unchecked")
-    protected TO map(MappingDataHelper dataHelper, FROM from, Class<TO> resultClass) {
+    protected TO map(MappingDataBuilder dataHelper, FROM from, Class<TO> resultClass) {
         if (!(from instanceof Map)) {
             throw new IllegalArgumentException("Source object is not a Map");
         }

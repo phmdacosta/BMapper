@@ -1,6 +1,6 @@
 package com.phmc.bmapper.resolver;
 
-import com.phmc.bmapper.MapperUtils;
+import com.phmc.bmapper.utils.MapperUtils;
 
 public class DefaultInstanceResolver implements CollectionInstanceResolver<Object> {
     @Override
