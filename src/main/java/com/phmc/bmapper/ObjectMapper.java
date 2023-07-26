@@ -10,19 +10,6 @@ import java.util.Map;
 
 public class ObjectMapper extends TypeMapper<Object, Object> {
 
-    @Override
-    protected Object map(Object from, Class<Object> resultClass) {
-        Object result = null;
-        try {
-            result = MapperUtils.getInstance(resultClass);
-            Class<?> fromClass = from.getClass();
-            doMapping(null, from, fromClass, result, resultClass);
-        } catch (Exception e) {
-            Log.warn(BMapper.class, e.getMessage());
-        }
-
-        return result;
-    }
 
     @Override
     protected Object map(MappingDataBuilder dataHelper, Object from, Class<Object> resultClass) {
