@@ -5,11 +5,12 @@ import com.pedrocosta.springutils.output.Log;
 import com.phmc.bmapper.builder.MappingDataBuilder;
 import com.phmc.bmapper.exceptions.NoMappingException;
 import com.phmc.bmapper.utils.MapperUtils;
+import com.phmc.bmapper.utils.MappingType;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.Map;
+import java.util.*;
 
 public class ObjectMapper extends TypeMapper<Object, Object> {
-
 
     @Override
     protected Object map(MappingDataBuilder dataHelper, Object from, Class<Object> resultClass) {
@@ -26,11 +27,19 @@ public class ObjectMapper extends TypeMapper<Object, Object> {
     }
 
     @SuppressWarnings("unchecked")
-    protected <T,F> void doMapping(MappingDataBuilder dataHelper, F from, Class<?> fromClass, T result, Class<?> resultClass) {
-        Map<ChainPropertyDescriptor, ChainPropertyDescriptor> mappedProperties = null;
+    protected <T,F> void doMapping(final @NotNull MappingDataBuilder dataHelper, final F from, final Class<?> fromClass, T result, final Class<?> resultClass) {
+        if (from == null) {
+            return;
+        }
 
-        if (dataHelper != null) {
-            mappedProperties = dataHelper.getMappedObjects().get(MapperUtils.getMappingKeyName(fromClass, resultClass));
+        Map<ChainPropertyDescriptor, ChainPropertyDescriptor> mappedProperties = dataHelper.getMappedObjects()
+                .get(MapperUtils.getMappingKeyName(fromClass, resultClass));
+
+        if (mappedProperties == null && fromClass.equals(resultClass)) {
+            Map<String, Map<ChainPropertyDescriptor, ChainPropertyDescriptor>> mappedObjects = MapperUtils
+                    .getMappedProperties(fromClass, resultClass, Collections.singleton(MappingType.SAME_CLASS));
+            dataHelper.setMappedObjects(mappedObjects);
+            mappedProperties = mappedObjects.get(MapperUtils.getMappingKeyName(fromClass, resultClass));
         }
 
         if (mappedProperties == null) {
@@ -43,7 +52,7 @@ public class ObjectMapper extends TypeMapper<Object, Object> {
                 try {
                     if (chainSetter.size() > 0) {
                         Object instanceSetter = null;
-                        for (int i = 1; i < chainSetter.size(); i++) {
+                        for (int i = 0; i < (chainSetter.size() - 1); i++) {
                             PropertyDescriptor propertyDescSetter = chainSetter.get(i);
                             if (propertyDescSetter == null) {
                                 continue;
@@ -56,13 +65,13 @@ public class ObjectMapper extends TypeMapper<Object, Object> {
                                 propertyDescSetter.getWriteMethod().invoke(instanceSetter, MapperUtils.getInstance(propertyDescSetter.getPropertyType()));
                             }
                         }
-                        PropertyDescriptor propertyDescSetter = chainSetter.get(chainSetter.size());
+                        PropertyDescriptor propertyDescSetter = chainSetter.get(chainSetter.size() - 1);
                         instanceSetter = instanceSetter == null ? result : propertyDescSetter.getBeanInstance();
 
                         Object instanceGetter = null;
                         Object fieldValue = null;
                         ChainPropertyDescriptor chainGetter = entry.getValue();
-                        for (int i = 1; i <= chainGetter.size(); i++) {
+                        for (int i = 0; i < chainGetter.size(); i++) {
                             PropertyDescriptor propertyDescGetter = chainGetter.get(i);
                             if (propertyDescGetter == null) {
                                 continue;
@@ -72,7 +81,7 @@ public class ObjectMapper extends TypeMapper<Object, Object> {
                                 instanceGetter = from;
                             }
 
-                            if (i == chainGetter.size()) {
+                            if (i == (chainGetter.size() - 1)) {
                                 fieldValue = propertyDescGetter.getReadMethod().invoke(instanceGetter);
                             } else {
                                 instanceGetter = propertyDescGetter.getReadMethod().invoke(instanceGetter);

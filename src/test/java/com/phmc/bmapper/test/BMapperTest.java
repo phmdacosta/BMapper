@@ -2,8 +2,11 @@ package com.phmc.bmapper.test;
 
 import com.pedrocosta.springutils.ClassFinder;
 import com.phmc.bmapper.BMapper;
+import com.phmc.bmapper.annotation.AnnotationMappingLoader;
+import com.phmc.bmapper.annotation.MappingClass;
+import com.phmc.bmapper.builder.BMapperBuilder;
 import com.phmc.bmapper.test.obj.*;
-import com.phmc.bmapper.test.utils.MockClassFinderHelper;
+import com.phmc.bmapper.test.utils.MockHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
@@ -13,44 +16,62 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.*;
 
 public class BMapperTest {
 
     private BMapper bMapper;
+    private AnnotationMappingLoader annotationMappingLoader;
 
     @BeforeEach
     public void setUp() {
-        this.bMapper = new BMapper();
+//        this.annotationMappingLoader = mock(AnnotationMappingLoader.class);
+        this.bMapper = BMapperBuilder.init(BMapper.class).build();
     }
 
     @Test
-    public void test_viewMapping_commonFields_success() throws Exception {
-        try (MockedStatic<ClassFinder> utilMocked = mockStatic(ClassFinder.class)) {
-            utilMocked.when(() -> ClassFinder.findAllByAssignable(any(), any()))
-                    .thenReturn(MockClassFinderHelper.mockFindAllByAssignable_full());
+    public void test_viewMapping_commonFields_success() {
+        TestModel model = new TestModel();
+        model.setId(1);
+        model.setName("Model Name");
+        model.setBool(true);
 
-            TestModel model = new TestModel();
-            model.setId(1);
-            model.setName("Model Name");
-            model.setBool(true);
+        TestChildModel child = new TestChildModel();
+        child.setName("Child Name");
+        model.setChild(child);
 
-            TestChildModel child = new TestChildModel();
-            child.setName("Child Name");
-            model.setChild(child);
+        TestView view = bMapper.map(model, TestView.class);
+        assertEquals(model.getName(), view.getName());
+        assertEquals(model.isBool(), view.isBool());
+        assertEquals(model.getChild().getName(), view.getChild().getName());
 
-            TestView view = bMapper.map(model, TestView.class);
-            assertEquals(model.getName(), view.getName());
-            assertEquals(model.isBool(), view.isBool());
-            assertEquals(model.getChild().getName(), view.getChild().getName());
-        }
+//        try (MockedStatic<ClassFinder> utilMocked = mockStatic(ClassFinder.class)) {
+//            utilMocked.when(() -> ClassFinder.findAllByAssignable(any(), any()))
+//                    .thenReturn(MockHelper.mockFindAllByAssignable_full());
+//
+//            BMapper bMapper = BMapperBuilder.init(MockHelper.mockContext()).build();
+//
+//            TestModel model = new TestModel();
+//            model.setId(1);
+//            model.setName("Model Name");
+//            model.setBool(true);
+//
+//            TestChildModel child = new TestChildModel();
+//            child.setName("Child Name");
+//            model.setChild(child);
+//
+//            TestView view = bMapper.map(model, TestView.class);
+//            assertEquals(model.getName(), view.getName());
+//            assertEquals(model.isBool(), view.isBool());
+//            assertEquals(model.getChild().getName(), view.getChild().getName());
+//        }
     }
 
     @Test
-    public void test_modelMapping_commonFields_success() throws Exception {
+    public void test_modelMapping_commonFields_success() {
         try (MockedStatic<ClassFinder> utilMocked = mockStatic(ClassFinder.class)) {
             utilMocked.when(() -> ClassFinder.findAllByAssignable(any(), any()))
-                    .thenReturn(MockClassFinderHelper.mockFindAllByAssignable_full());
+                    .thenReturn(MockHelper.mockFindAllByAssignable_full());
 
             TestView view = new TestView();
             view.setName("Model Name");
@@ -68,10 +89,10 @@ public class BMapperTest {
     }
 
     @Test
-    public void test_bothMapping_collections_success() throws Exception {
+    public void test_bothMapping_collections_success() {
         try (MockedStatic<ClassFinder> utilMocked = mockStatic(ClassFinder.class)) {
             utilMocked.when(() -> ClassFinder.findAllByAssignable(any(), any()))
-                    .thenReturn(MockClassFinderHelper.mockFindAllByAssignable_full());
+                    .thenReturn(MockHelper.mockFindAllByAssignable_full());
 
             //Model
             TestModel model = new TestModel();
@@ -129,10 +150,10 @@ public class BMapperTest {
     }
 
     @Test
-    public void test_viewMapping_annotation_success() throws Exception {
+    public void test_viewMapping_annotation_success() {
         try (MockedStatic<ClassFinder> utilMocked = mockStatic(ClassFinder.class)) {
             utilMocked.when(() -> ClassFinder.findAllByAssignable(any(), any()))
-                    .thenReturn(MockClassFinderHelper.mockFindAllByAssignable_full());
+                    .thenReturn(MockHelper.mockFindAllByAssignable_full());
 
             TestModel model = new TestModel();
             model.setId(1);
@@ -169,7 +190,7 @@ public class BMapperTest {
     public void test_modelMapping_annotation_success() throws Exception {
         try (MockedStatic<ClassFinder> utilMocked = mockStatic(ClassFinder.class)) {
             utilMocked.when(() -> ClassFinder.findAllByAssignable(any(), any()))
-                    .thenReturn(MockClassFinderHelper.mockFindAllByAssignable_full());
+                    .thenReturn(MockHelper.mockFindAllByAssignable_full());
 
             TestViewAnnot view = new TestViewAnnot();
             view.setViewName("Model Name");
@@ -206,7 +227,7 @@ public class BMapperTest {
     public void test_bothMapping_annotation_collections_success() throws Exception {
         try (MockedStatic<ClassFinder> utilMocked = mockStatic(ClassFinder.class)) {
             utilMocked.when(() -> ClassFinder.findAllByAssignable(any(), any()))
-                    .thenReturn(MockClassFinderHelper.mockFindAllByAssignable_full());
+                    .thenReturn(MockHelper.mockFindAllByAssignable_full());
 
             //Model
             TestModel model = new TestModel();
@@ -265,57 +286,96 @@ public class BMapperTest {
 
     @Test
     public void test_bothMapping_sameClasses_success() throws Exception {
-        try (MockedStatic<ClassFinder> utilMocked = mockStatic(ClassFinder.class)) {
-            utilMocked.when(() -> ClassFinder.findAllByAssignable(any(), any()))
-                    .thenReturn(MockClassFinderHelper.mockFindAllByAssignable_full());
+        //Model
+        TestModel model = new TestModel();
+        model.setId(1);
+        model.setName("Model Name");
+        model.setBool(true);
 
-            //Model
-            TestModel model = new TestModel();
-            model.setId(1);
-            model.setName("Model Name");
-            model.setBool(true);
+        TestChildModel child = new TestChildModel();
+        child.setName("Child Name");
+        model.setChild(child);
 
-            TestChildModel child = new TestChildModel();
-            child.setName("Child Name");
-            model.setChild(child);
+        TestChildModel child1 = new TestChildModel();
+        TestChildModel child2 = new TestChildModel();
+        child1.setName("Child Name 1");
+        child2.setName("Child Name 2");
+        model.getChildren().add(child1);
+        model.getChildren().add(child2);
+        model.getChildrenMap().put(1, child1);
+        model.getChildrenMap().put(2, child2);
 
-            TestChildModel child1 = new TestChildModel();
-            TestChildModel child2 = new TestChildModel();
-            child1.setName("Child Name 1");
-            child2.setName("Child Name 2");
-            model.getChildren().add(child1);
-            model.getChildren().add(child2);
-            model.getChildrenMap().put(1, child1);
-            model.getChildrenMap().put(2, child2);
+        //Mapping
+        TestModel mapped = bMapper.map(model, TestModel.class);
 
-            //Mapping
-            TestModel mapped = bMapper.map(model, TestModel.class);
+        //Assertions
+        assertEquals(model.getName(), mapped.getName());
+        assertEquals(model.isBool(), mapped.isBool());
+        assertEquals(model.getChild().getName(), mapped.getChild().getName());
 
-            //Assertions
-            assertEquals(model.getName(), mapped.getName());
-            assertEquals(model.isBool(), mapped.isBool());
-            assertEquals(model.getChild().getName(), mapped.getChild().getName());
-
-            for (TestChildModel mappedChildModel : mapped.getChildren()) {
-                Collection<?> found = model.getChildren().stream().filter(
-                        _child -> _child.getName().equals(mappedChildModel.getName())).collect(Collectors.toList());
-                assertFalse(found.isEmpty());
-            }
-
-            for (Map.Entry<Integer, TestChildModel> entry : mapped.getChildrenMap().entrySet()) {
-                Map.Entry<Integer, TestChildModel> found = model.getChildrenMap().entrySet().stream()
-                        .filter(_entry -> _entry.getValue().getName().equals(entry.getValue().getName()))
-                        .findFirst().orElse(null);
-                assertNotNull(found);
-            }
+        for (TestChildModel mappedChildModel : mapped.getChildren()) {
+            Collection<?> found = model.getChildren().stream().filter(
+                    _child -> _child.getName().equals(mappedChildModel.getName())).collect(Collectors.toList());
+            assertFalse(found.isEmpty());
         }
+
+        for (Map.Entry<Integer, TestChildModel> entry : mapped.getChildrenMap().entrySet()) {
+            Map.Entry<Integer, TestChildModel> found = model.getChildrenMap().entrySet().stream()
+                    .filter(_entry -> _entry.getValue().getName().equals(entry.getValue().getName()))
+                    .findFirst().orElse(null);
+            assertNotNull(found);
+        }
+//        try (MockedStatic<ClassFinder> utilMocked = mockStatic(ClassFinder.class)) {
+//            utilMocked.when(() -> ClassFinder.findAllByAssignable(any(), any()))
+//                    .thenReturn(MockHelper.mockFindAllByAssignable_full());
+//
+//            //Model
+//            TestModel model = new TestModel();
+//            model.setId(1);
+//            model.setName("Model Name");
+//            model.setBool(true);
+//
+//            TestChildModel child = new TestChildModel();
+//            child.setName("Child Name");
+//            model.setChild(child);
+//
+//            TestChildModel child1 = new TestChildModel();
+//            TestChildModel child2 = new TestChildModel();
+//            child1.setName("Child Name 1");
+//            child2.setName("Child Name 2");
+//            model.getChildren().add(child1);
+//            model.getChildren().add(child2);
+//            model.getChildrenMap().put(1, child1);
+//            model.getChildrenMap().put(2, child2);
+//
+//            //Mapping
+//            TestModel mapped = bMapper.map(model, TestModel.class);
+//
+//            //Assertions
+//            assertEquals(model.getName(), mapped.getName());
+//            assertEquals(model.isBool(), mapped.isBool());
+//            assertEquals(model.getChild().getName(), mapped.getChild().getName());
+//
+//            for (TestChildModel mappedChildModel : mapped.getChildren()) {
+//                Collection<?> found = model.getChildren().stream().filter(
+//                        _child -> _child.getName().equals(mappedChildModel.getName())).collect(Collectors.toList());
+//                assertFalse(found.isEmpty());
+//            }
+//
+//            for (Map.Entry<Integer, TestChildModel> entry : mapped.getChildrenMap().entrySet()) {
+//                Map.Entry<Integer, TestChildModel> found = model.getChildrenMap().entrySet().stream()
+//                        .filter(_entry -> _entry.getValue().getName().equals(entry.getValue().getName()))
+//                        .findFirst().orElse(null);
+//                assertNotNull(found);
+//            }
+//        }
     }
 
     @Test
     public void test_viewCollectionMapping_fromList_commonFields_success() throws Exception {
         try (MockedStatic<ClassFinder> utilMocked = mockStatic(ClassFinder.class)) {
             utilMocked.when(() -> ClassFinder.findAllByAssignable(any(), any()))
-                    .thenReturn(MockClassFinderHelper.mockFindAllByAssignable_full());
+                    .thenReturn(MockHelper.mockFindAllByAssignable_full());
 
             final List<TestModel> modelList = generateModelList();
 
@@ -340,7 +400,7 @@ public class BMapperTest {
     public void test_viewCollectionMapping_fromSet_commonFields_success() throws Exception {
         try (MockedStatic<ClassFinder> utilMocked = mockStatic(ClassFinder.class)) {
             utilMocked.when(() -> ClassFinder.findAllByAssignable(any(), any()))
-                    .thenReturn(MockClassFinderHelper.mockFindAllByAssignable_full());
+                    .thenReturn(MockHelper.mockFindAllByAssignable_full());
 
             final Set<TestModel> modelSet = new HashSet<>(generateModelList());
 
@@ -365,7 +425,7 @@ public class BMapperTest {
     public void test_modelCollectionMapping_fromList_commonFields_success() throws Exception {
         try (MockedStatic<ClassFinder> utilMocked = mockStatic(ClassFinder.class)) {
             utilMocked.when(() -> ClassFinder.findAllByAssignable(any(), any()))
-                    .thenReturn(MockClassFinderHelper.mockFindAllByAssignable_full());
+                    .thenReturn(MockHelper.mockFindAllByAssignable_full());
 
             final List<TestView> viewList = generateViewList();
 
@@ -390,7 +450,7 @@ public class BMapperTest {
     public void test_modelCollectionMapping_fromSet_commonFields_success() throws Exception {
         try (MockedStatic<ClassFinder> utilMocked = mockStatic(ClassFinder.class)) {
             utilMocked.when(() -> ClassFinder.findAllByAssignable(any(), any()))
-                    .thenReturn(MockClassFinderHelper.mockFindAllByAssignable_full());
+                    .thenReturn(MockHelper.mockFindAllByAssignable_full());
 
             final Set<TestView> viewSet = new HashSet<>(generateViewList());
 
@@ -415,7 +475,7 @@ public class BMapperTest {
     public void test_viewMappingWithSuper_commonFields_success() throws Exception {
         try (MockedStatic<ClassFinder> utilMocked = mockStatic(ClassFinder.class)) {
             utilMocked.when(() -> ClassFinder.findAllByAssignable(any(), any()))
-                    .thenReturn(MockClassFinderHelper.mockFindAllByAssignable_full());
+                    .thenReturn(MockHelper.mockFindAllByAssignable_full());
 
             TestModelExt model = new TestModelExt();
             model.setId(1);
@@ -439,7 +499,7 @@ public class BMapperTest {
     public void test_viewMappingWithSuper_annotation_success() throws Exception {
         try (MockedStatic<ClassFinder> utilMocked = mockStatic(ClassFinder.class)) {
             utilMocked.when(() -> ClassFinder.findAllByAssignable(any(), any()))
-                    .thenReturn(MockClassFinderHelper.mockFindAllByAssignable_full());
+                    .thenReturn(MockHelper.mockFindAllByAssignable_full());
 
             TestModelExt model = new TestModelExt();
             model.setId(1);

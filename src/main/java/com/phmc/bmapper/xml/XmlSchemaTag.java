@@ -6,7 +6,8 @@ public enum XmlSchemaTag {
     CLASS("class"),
     FIELD("field"),
     A("a"),
-    B("b");
+    B("b"),
+    SAME_FIELDS("same-fields");
 
     private final String tag;
 

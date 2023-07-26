@@ -1,10 +1,13 @@
 package com.phmc.bmapper.test.obj;
 
+import com.phmc.bmapper.annotation.MappingClass;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@MappingClass(targetClass = TestModel.class)
 public class TestView {
     private String name;
     private boolean bool;

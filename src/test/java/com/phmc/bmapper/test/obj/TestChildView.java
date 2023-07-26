@@ -1,5 +1,8 @@
 package com.phmc.bmapper.test.obj;
 
+import com.phmc.bmapper.annotation.MappingClass;
+
+@MappingClass(targetClass = TestChildModel.class)
 public class TestChildView {
     private String name;
 

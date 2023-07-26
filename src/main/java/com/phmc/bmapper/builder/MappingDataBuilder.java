@@ -11,6 +11,7 @@ import java.util.Set;
 
 public class MappingDataBuilder {
     private final Set<MappingType> mappingTypes;
+    private Class<?> mainClass;
     private ApplicationContext context;
     private Map<String, Map<ChainPropertyDescriptor, ChainPropertyDescriptor>> mappedObjects;
 
@@ -23,6 +24,14 @@ public class MappingDataBuilder {
 
     public void removeMappingTypes(MappingType mappingType) {
         this.mappingTypes.remove(mappingType);
+    }
+
+    public Set<MappingType> getMappingTypes() {
+        return mappingTypes;
+    }
+
+    public void setMainClass(Class<?> mainClass) {
+        this.mainClass = mainClass;
     }
 
     public void setContext(ApplicationContext context) {
@@ -38,6 +47,6 @@ public class MappingDataBuilder {
     }
 
     public void initMappingProps() {
-        this.setMappedObjects(MapperUtils.getMappedProperties(this.context, this.mappingTypes));
+        this.setMappedObjects(MapperUtils.getMappedProperties(this.mainClass, this.mappingTypes));
     }
 }

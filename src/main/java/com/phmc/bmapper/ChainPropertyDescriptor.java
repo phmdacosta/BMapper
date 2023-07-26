@@ -1,15 +1,14 @@
 package com.phmc.bmapper;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ChainPropertyDescriptor {
     private Class<?> objClass;
-    private final Map<Integer, PropertyDescriptor> chain;
-    private int size;
+    private final List<PropertyDescriptor> chain;
 
     public ChainPropertyDescriptor() {
-        chain = new HashMap<>();
+        chain = new ArrayList<>();
     }
 
     public void setObjClass(Class<?> objClass) {
@@ -21,7 +20,7 @@ public class ChainPropertyDescriptor {
     }
 
     public void add(PropertyDescriptor propertyDescriptor) {
-        chain.put(++size, propertyDescriptor);
+        chain.add(propertyDescriptor);
     }
 
     public PropertyDescriptor get(int index) {
@@ -29,11 +28,57 @@ public class ChainPropertyDescriptor {
     }
 
     public int size() {
-        return size;
+        return chain.size();
     }
 
     public boolean isEmpty() {
         return chain.isEmpty();
+    }
+
+    public boolean contains(String fieldName) {
+        return chain.stream().anyMatch(elem -> elem.getName().equals(fieldName));
+    }
+
+    public boolean contains(String[] chainedFieldNames) {
+        if (chainedFieldNames.length == 0) {
+            return false;
+        }
+
+        if (chainedFieldNames.length == 1) {
+            return this.contains(chainedFieldNames[0]);
+        }
+
+        for (String fieldName : chainedFieldNames) {
+            if (!this.contains(fieldName)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public boolean contains(PropertyDescriptor propertyDescriptor) {
+        return chain.contains(propertyDescriptor);
+    }
+
+    public boolean isSameAs(ChainPropertyDescriptor other) {
+        if (other == null) {
+            return false;
+        }
+
+        if (this.chain.size() != other.chain.size()) {
+            return false;
+        }
+
+        for(int i = 0; i < chain.size(); i++) {
+            PropertyDescriptor thisPropDesc = chain.get(i);
+            PropertyDescriptor otherPropDesc = other.chain.get(i);
+            if (!thisPropDesc.getName().equals(otherPropDesc.getName())) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     @Override
@@ -41,10 +86,10 @@ public class ChainPropertyDescriptor {
         final StringBuilder sb = new StringBuilder();
         sb.append("{ ");
         sb.append("size=");
-        sb.append(size);
+        sb.append(size());
         if (!chain.isEmpty()) {
             sb.append(", chain=[");
-            chain.forEach((key, value) -> {
+            chain.forEach(value -> {
                 sb.append(value);
                 sb.append(" ");
             });

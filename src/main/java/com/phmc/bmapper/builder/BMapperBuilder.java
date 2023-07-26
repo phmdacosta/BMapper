@@ -16,6 +16,12 @@ public class BMapperBuilder {
         return builder;
     }
 
+    public static BMapperBuilder init(Class<?> mainClass) {
+        BMapperBuilder builder = new BMapperBuilder();
+        builder.helper = builder.initHelper(mainClass);
+        return builder;
+    }
+
     public static void loadMappingProps(BMapper mapper) {
         if (mapper.getMappingDataBuilder() != null) {
             mapper.getMappingDataBuilder().initMappingProps();
@@ -51,6 +57,14 @@ public class BMapperBuilder {
         BMapperBuilderHelper helper = new BMapperBuilderHelper();
         helper.setMappingDataBuilder(new MappingDataBuilder());
         helper.getMappingDataBuilder().setContext(context);
+        helper.getMappingDataBuilder().addMappingTypes(MappingType.ANNOTATION);
+        return helper;
+    }
+
+    private BMapperBuilderHelper initHelper(Class<?> mainClass) {
+        BMapperBuilderHelper helper = new BMapperBuilderHelper();
+        helper.setMappingDataBuilder(new MappingDataBuilder());
+        helper.getMappingDataBuilder().setMainClass(mainClass);
         helper.getMappingDataBuilder().addMappingTypes(MappingType.ANNOTATION);
         return helper;
     }

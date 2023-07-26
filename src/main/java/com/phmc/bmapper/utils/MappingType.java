@@ -4,6 +4,7 @@ import com.phmc.bmapper.annotation.AnnotationMappingLoader;
 import com.phmc.bmapper.xml.XmlMappingLoader;
 
 public enum MappingType {
+    SAME_CLASS(new SameClassMappingLoader()),
     ANNOTATION(new AnnotationMappingLoader()),
     XML(new XmlMappingLoader());
 
