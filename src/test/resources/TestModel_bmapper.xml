@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<bmapper xmlns:xsi="http://www.w3.org/2001/XMLSchema">
+    <mapping
+            class-a="com.phmc.bmapper.test.obj.TestModel"
+            class-b="com.phmc.bmapper.test.obj.TestViewAnnot">
+        <field>
+            <a>name</a>
+            <b>viewName</b>
+        </field>
+        <field>
+            <a>bool</a>
+            <b>bool</b>
+        </field>
+        <field>
+            <a>child</a>
+            <b>childView</b>
+        </field>
+        <field>
+            <a>child.name</a>
+            <b>childViewName</b>
+        </field>
+        <field type="java.util.List">
+            <a>children</a>
+            <b>childrenView</b>
+        </field>
+        <field type="java.util.Map">
+            <a>childrenMap</a>
+            <b>childrenViewMap</b>
+        </field>
+    </mapping>
+    <mapping
+            class-a="com.phmc.bmapper.test.obj.TestModel"
+            class-b="com.phmc.bmapper.test.obj.TestView">
+        <same-fields/>
+    </mapping>
+</bmapper>
