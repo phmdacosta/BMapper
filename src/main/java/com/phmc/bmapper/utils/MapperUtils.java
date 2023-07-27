@@ -16,6 +16,13 @@ import java.util.*;
 
 public class MapperUtils {
 
+    /**
+     * Instantiate a class that have constructor without parameters.
+     *
+     * @param clazz Class to instantiate
+     * @return  A new instance of the class
+     * @param <T>   Type to object
+     */
     public static <T> T getInstance(final Class<T> clazz) {
         T result = null;
         try {
@@ -33,7 +40,39 @@ public class MapperUtils {
     /**
      * Create the mapping of all properties between to objects.
      *
-     * @param context       Context of application
+     * @param mappingContext    Context to find all mapped classes
+     * @param mappingTypes      Set of mapping types
+     * @return
+     * <br>
+     * A map with {@link ChainPropertyDescriptor} key and {@link ChainPropertyDescriptor} value,
+     * where the key has properties of the target object and the value has properties of the source object.
+     *
+     * <pre>
+     * <code>
+     * Example: <br>
+     *      Source -> Square{ height, width } <br>
+     *      Target -> SquareDTO{ height } <br>
+     *      Map -> [ <br>
+     *              key: ChainPropertyDescriptor{ SquareDTO::height }, <br>
+     *              value: ChainPropertyDescriptor{ Square::height } <br>
+     *             ]
+     * </code>
+     * <pre/>
+     */
+    public static Map<String, Map<ChainPropertyDescriptor, ChainPropertyDescriptor>> getMappedProperties(MappingContext mappingContext, Set<MappingType> mappingTypes) {
+        Map<String, Map<ChainPropertyDescriptor, ChainPropertyDescriptor>> mappedObjects = new HashMap<>();
+        for (MappingType mappingType : mappingTypes) {
+            MappingLoader loader = mappingType.getLoader();
+            mappedObjects.putAll(loader.getMappedProperties(mappingContext));
+        }
+        return mappedObjects;
+    }
+
+    /**
+     * Create the mapping of all properties between to objects.
+     *
+     * @param fromClass     Source class
+     * @param toClass       Target class
      * @param mappingTypes  Set of mapping types
      * @return
      * <br>
@@ -52,24 +91,6 @@ public class MapperUtils {
      * </code>
      * <pre/>
      */
-    public static Map<String, Map<ChainPropertyDescriptor, ChainPropertyDescriptor>> getMappedProperties(final ApplicationContext context, Set<MappingType> mappingTypes) {
-        Map<String, Map<ChainPropertyDescriptor, ChainPropertyDescriptor>> mappedObjects = new HashMap<>();
-        for (MappingType mappingType : mappingTypes) {
-            MappingLoader loader = mappingType.getLoader();
-            mappedObjects.putAll(loader.getMappedProperties(context));
-        }
-        return mappedObjects;
-    }
-
-    public static Map<String, Map<ChainPropertyDescriptor, ChainPropertyDescriptor>> getMappedProperties(Class<?> mainClass, Set<MappingType> mappingTypes) {
-        Map<String, Map<ChainPropertyDescriptor, ChainPropertyDescriptor>> mappedObjects = new HashMap<>();
-        for (MappingType mappingType : mappingTypes) {
-            MappingLoader loader = mappingType.getLoader();
-            mappedObjects.putAll(loader.getMappedProperties(mainClass));
-        }
-        return mappedObjects;
-    }
-
     public static Map<String, Map<ChainPropertyDescriptor, ChainPropertyDescriptor>> getMappedProperties(Class<?> fromClass, Class<?> toClass, Set<MappingType> mappingTypes) {
         Map<String, Map<ChainPropertyDescriptor, ChainPropertyDescriptor>> mappedObjects = new HashMap<>();
         for (MappingType mappingType : mappingTypes) {
@@ -79,16 +100,17 @@ public class MapperUtils {
         return mappedObjects;
     }
 
+    /**
+     * Get a {@code String} array with all properties from a mapped property name divided by dot.
+     * @param chainedPropName   Mapped property name
+     * @return  {@code String} array with properties names
+     */
     public static String[] getAllPropertiesFromChain(String chainedPropName) {
         String[] chainPropName = { chainedPropName };
         if (chainPropName[0].contains(".")) {
             chainPropName = chainPropName[0].split("\\.");
         }
         return chainPropName;
-    }
-
-    public static boolean hasMappingClassAnnotation(Class<?> clazz) {
-        return ClassUtils.hasAnnotation(clazz, MappingClass.class);
     }
 
     public static boolean hasMappingAnnotation(Field field) {
@@ -118,19 +140,18 @@ public class MapperUtils {
 
     public static PropertyDescriptor[] getPropertyDescriptors(Class<?> clazz) {
         java.beans.PropertyDescriptor[] propDescArr = BeanUtils.getPropertyDescriptors(clazz);
-        PropertyDescriptor[] result = new PropertyDescriptor[propDescArr.length];
-        for (int i = 0; i < propDescArr.length; i++) {
-            java.beans.PropertyDescriptor propDesc = propDescArr[i];
+        List<PropertyDescriptor> result = new ArrayList<>();
+        for (java.beans.PropertyDescriptor propDesc : propDescArr) {
             if (isValidPropertyDescriptor(propDesc)) {
                 Annotation annotation = getMappingAnnotation(propDesc);
                 try {
-                    result[i] = new PropertyDescriptor(propDesc, clazz, getInstance(clazz), annotation);
+                    result.add(new PropertyDescriptor(propDesc, clazz, getInstance(clazz), annotation));
                 } catch (IntrospectionException e) {
                     Log.error(BMapper.class, e);
                 }
             }
         }
-        return result;
+        return result.toArray(new PropertyDescriptor[0]);
     }
 
     public static ChainPropertyDescriptor buildChainPropertyDescriptor(Class<?> lookingClass, String fieldName) {
@@ -217,6 +238,12 @@ public class MapperUtils {
         return method.getParameterTypes().length > 0 ? method.getParameterTypes()[0] : method.getReturnType();
     }
 
+    /**
+     * Build key name for mapping.
+     * @param fromClass
+     * @param toClass
+     * @return  Key name: FromClassName>>ToClassName
+     */
     public static String getMappingKeyName(final Class<?> fromClass, final Class<?> toClass) {
         if (fromClass == null || toClass == null) {
             return "";

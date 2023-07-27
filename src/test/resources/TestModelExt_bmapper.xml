@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<bmapper xmlns:xsi="http://www.w3.org/2001/XMLSchema">
+    <mapping
+            class-a="com.phmc.bmapper.test.obj.TestModelExt"
+            class-b="com.phmc.bmapper.test.obj.TestViewExt">
+        <same-fields/>
+    </mapping>
+    <mapping
+            class-a="com.phmc.bmapper.test.obj.TestModelExt"
+            class-b="com.phmc.bmapper.test.obj.TestViewExtAnnot">
+        <field>
+            <a>name</a>
+            <b>viewName</b>
+        </field>
+        <field>
+            <a>bool</a>
+            <b>viewBool</b>
+        </field>
+        <field>
+            <a>child</a>
+            <b>childView</b>
+        </field>
+        <field>
+            <a>child.name</a>
+            <b>childViewName</b>
+        </field>
+        <field type="java.util.List">
+            <a>children</a>
+            <b>viewChildren</b>
+        </field>
+        <field type="java.util.Map">
+            <a>childrenMap</a>
+            <b>viewChildrenMap</b>
+        </field>
+        <field>
+            <a>strExt</a>
+            <b>viewStrExt</b>
+        </field>
+    </mapping>
+</bmapper>

@@ -5,9 +5,9 @@ import com.phmc.bmapper.BMapper;
 import com.phmc.bmapper.ChainPropertyDescriptor;
 import com.phmc.bmapper.PropertyDescriptor;
 import com.phmc.bmapper.utils.MapperUtils;
+import com.phmc.bmapper.utils.MappingContext;
 import com.phmc.bmapper.utils.MappingLoader;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.context.ApplicationContext;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -17,106 +17,13 @@ import java.util.*;
 
 public class XmlMappingLoader implements MappingLoader {
     @Override
-    public @NotNull Map<String, Map<ChainPropertyDescriptor, ChainPropertyDescriptor>> getMappedProperties(ApplicationContext context) {
-//        Map<String, Map<ChainPropertyDescriptor, ChainPropertyDescriptor>> mappedObjects = new HashMap<>();
-//
-//        Set<Document> xmlDocuments = XmlFileLoader.loadXmlDocuments();
-//
-//        for (Document document : xmlDocuments) {
-//            document.getDocumentElement().normalize();
-//
-//            NodeList mappingNodeList = document.getElementsByTagName(XmlSchemaTag.MAPPING.getTag());
-//
-//            for (int indexMapping = 0; indexMapping < mappingNodeList.getLength(); indexMapping++) {
-//                Node mappingNode = mappingNodeList.item(indexMapping);
-//
-//                if (mappingNode.getNodeType() == Node.ELEMENT_NODE) {
-//                    Element mappingElement = (Element)mappingNode;
-//                    ChainPropertyDescriptor chainPropDescClassA = getChainPropertyDescriptor(mappingElement, XmlSchemaTag.A);
-//                    ChainPropertyDescriptor chainPropDescClassB = getChainPropertyDescriptor(mappingElement, XmlSchemaTag.B);
-//
-//                    // Create mapping properties from class A to class B
-//                    Map<ChainPropertyDescriptor, ChainPropertyDescriptor> chainPropDescMapAToB = new HashMap<>();
-//                    chainPropDescMapAToB.put(chainPropDescClassA, chainPropDescClassB);
-//                    mappedObjects.put(
-//                            MapperUtils.getMappingKeyName(chainPropDescClassA.getObjClass(), chainPropDescClassB.getObjClass()),
-//                            chainPropDescMapAToB);
-//
-//                    // Create mapping properties from class B to class A
-//                    Map<ChainPropertyDescriptor, ChainPropertyDescriptor> chainPropDescMapBToA = new HashMap<>();
-//                    chainPropDescMapBToA.put(chainPropDescClassA, chainPropDescClassB);
-//                    mappedObjects.put(
-//                            MapperUtils.getMappingKeyName(chainPropDescClassB.getObjClass(), chainPropDescClassA.getObjClass()),
-//                            chainPropDescMapBToA);
-//                }
-//            }
-//        }
-
-        return getMappedProperties(context.getClass());
-    }
-
-    @Override
-    public @NotNull Map<String, Map<ChainPropertyDescriptor, ChainPropertyDescriptor>> getMappedProperties(Class<?> mainClass) {
-//        Map<String, Map<ChainPropertyDescriptor, ChainPropertyDescriptor>> mappedObjects = new HashMap<>();
-
+    public @NotNull Map<String, Map<ChainPropertyDescriptor, ChainPropertyDescriptor>> getMappedProperties(final MappingContext mappingContext) {
         Set<Document> xmlDocuments = XmlFileLoader.loadXmlDocuments();
-
-//        for (Document document : xmlDocuments) {
-//            document.getDocumentElement().normalize();
-//
-//            NodeList mappingNodeList = document.getElementsByTagName(XmlSchemaTag.MAPPING.getTag());
-//
-//            for (int indexMapping = 0; indexMapping < mappingNodeList.getLength(); indexMapping++) {
-//                Node mappingNode = mappingNodeList.item(indexMapping);
-//
-//                if (mappingNode.getNodeType() == Node.ELEMENT_NODE) {
-//                    Element mappingElement = (Element)mappingNode;
-//
-////                    getMappedProperties(mappingElement);
-//
-//
-//
-//
-//
-//
-//
-//
-//                    ChainPropertyDescriptor chainPropDescClassA = getChainPropertyDescriptor(mappingElement, XmlSchemaTag.A);
-//                    ChainPropertyDescriptor chainPropDescClassB = getChainPropertyDescriptor(mappingElement, XmlSchemaTag.B);
-//
-//                    // Mapping same class A
-//
-//                    updateMap(mappedObjects, mappingElement);
-//
-//                    // Mapping same class B
-//                    Log.info(BMapper.class,
-//                            String.format("Initiate mapping: %s -> %s",
-//                                    chainPropDescClassB.getObjClass().getSimpleName(),
-//                                    chainPropDescClassB.getObjClass().getSimpleName()));
-//                    updateMap(mappedObjects, mappingElement);
-//
-//                    // Create mapping properties from class A to class B
-//                    Log.info(BMapper.class,
-//                            String.format("Initiate mapping: %s -> %s",
-//                                    chainPropDescClassA.getObjClass().getSimpleName(),
-//                                    chainPropDescClassB.getObjClass().getSimpleName()));
-//                    updateMap(mappedObjects, mappingElement);
-//
-//                    // Create mapping properties from class B to class A
-//                    Log.info(BMapper.class,
-//                            String.format("Initiate mapping: %s -> %s",
-//                                    chainPropDescClassB.getObjClass().getSimpleName(),
-//                                    chainPropDescClassA.getObjClass().getSimpleName()));
-//                    updateMap(mappedObjects, mappingElement);
-//                }
-//            }
-//        }
-
         return getMappedProperties(xmlDocuments);
     }
 
     @Override
-    public @NotNull Map<String, Map<ChainPropertyDescriptor, ChainPropertyDescriptor>> getMappedProperties(Class<?> classA, Class<?> classB) {
+    public @NotNull Map<String, Map<ChainPropertyDescriptor, ChainPropertyDescriptor>> getMappedProperties(final Class<?> classA, final Class<?> classB) {
         Set<Document> xmlDocuments = XmlFileLoader.loadXmlDocuments(classA.getSimpleName());
         if (xmlDocuments.isEmpty()) {
             xmlDocuments = XmlFileLoader.loadXmlDocuments(classB.getSimpleName());
@@ -182,13 +89,13 @@ public class XmlMappingLoader implements MappingLoader {
             PropertyDescriptor[] propDescArrClassB = MapperUtils.getPropertyDescriptors(xmlMappingClass.getClassB());
             int minSize = Math.min(propDescArrClassA.length, propDescArrClassB.length);
 
-            for (int i = 0; i < minSize; i++) {
-                PropertyDescriptor propDescClassA = propDescArrClassA[i];
-                PropertyDescriptor propDescClassB = propDescArrClassB[i];
-                if (propDescClassA.getName().equals(propDescClassB.getName())) {
-                    addToChainPropDescMap(resultMapChainPropDesc, xmlMappingClass.getClassA(), propDescClassA.getName(),
-                            xmlMappingClass.getClassB(), propDescClassB.getName());
-                }
+            for (final PropertyDescriptor propDescClassA : propDescArrClassA) {
+                Arrays.stream(propDescArrClassB)
+                        .filter(propDesc -> propDesc.getName().equals(propDescClassA.getName()))
+                        .findAny()
+                        .ifPresent(propDescClassB -> addToChainPropDescMap(resultMapChainPropDesc, xmlMappingClass.getClassA(), propDescClassA.getName(),
+                                xmlMappingClass.getClassB(), propDescClassB.getName()));
+
             }
         }
 
@@ -210,15 +117,16 @@ public class XmlMappingLoader implements MappingLoader {
             xmlMappingClass.setClassA(Class.forName(mappingElement.getAttribute("class-a")));
             xmlMappingClass.setClassB(Class.forName(mappingElement.getAttribute("class-b")));
 
+            NodeList sameFieldsNodeList = mappingElement.getElementsByTagName(XmlSchemaTag.SAME_FIELDS.getTag());
+            if (sameFieldsNodeList.getLength() > 0) {
+                xmlMappingClass.setHasSameFields(true);
+            }
+
             NodeList fieldNodeList = mappingElement.getElementsByTagName(XmlSchemaTag.FIELD.getTag());
             for (int indexField = 0; indexField < fieldNodeList.getLength(); indexField++) {
                 Node fieldNode = fieldNodeList.item(indexField);
                 if (fieldNode.getNodeType() == Node.ELEMENT_NODE) {
                     Element fieldElement = (Element)fieldNode;
-
-                    if (XmlSchemaTag.SAME_FIELDS.getTag().equals(fieldElement.getTagName())) {
-                        xmlMappingClass.setHasSameFields(true);
-                    }
 
                     NodeList fieldANodeList = fieldElement.getElementsByTagName(XmlSchemaTag.A.getTag());
                     NodeList fieldBNodeList = fieldElement.getElementsByTagName(XmlSchemaTag.B.getTag());
@@ -230,10 +138,10 @@ public class XmlMappingLoader implements MappingLoader {
                     XmlMappingField xmlMappingField = new XmlMappingField();
                     xmlMappingField.setFieldType(fieldElement.getAttribute("type"));
 
-                    String propertyAName = fieldANodeList.item(0).getNodeValue();
+                    String propertyAName = fieldANodeList.item(0).getTextContent();
                     xmlMappingField.setFieldA(propertyAName);
 
-                    String propertyBName = fieldBNodeList.item(0).getNodeValue();
+                    String propertyBName = fieldBNodeList.item(0).getTextContent();
                     xmlMappingField.setFieldB(propertyBName);
 
                     xmlMappingClass.addMappingField(xmlMappingField);
@@ -279,6 +187,9 @@ public class XmlMappingLoader implements MappingLoader {
         if (clazz.equals(xmlMappingClass.getClassA())) {
             mappingSameClass.setClassA(xmlMappingClass.getClassA());
             mappingSameClass.setClassB(xmlMappingClass.getClassA());
+        } else {
+            mappingSameClass.setClassA(xmlMappingClass.getClassB());
+            mappingSameClass.setClassB(xmlMappingClass.getClassB());
         }
 
         return mappingSameClass;
