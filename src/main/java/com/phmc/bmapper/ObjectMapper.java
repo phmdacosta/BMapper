@@ -89,7 +89,7 @@ public class ObjectMapper extends TypeMapper<Object, Object> {
                         }
 
                         if (fieldValue != null && !ClassUtils.isSimpleProperty(fieldValue.getClass())) {
-                            fieldValue = ((TypeMapper<Object, Object>)loadMapper(fromClass, propertyDescSetter.getPropertyType())).doMapping(dataHelper, fieldValue, (Class<Object>) propertyDescSetter.getPropertyType());
+                            fieldValue = ((TypeMapper<Object, Object>)loadMapper(fieldValue.getClass(), propertyDescSetter.getPropertyType())).doMapping(dataHelper, fieldValue, (Class<Object>) propertyDescSetter.getPropertyType());
                         }
                         propertyDescSetter.getWriteMethod().invoke(instanceSetter, fieldValue);
                     }
