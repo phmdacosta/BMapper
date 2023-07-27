@@ -2,6 +2,7 @@ package com.phmc.bmapper.builder;
 
 import com.phmc.bmapper.ChainPropertyDescriptor;
 import com.phmc.bmapper.utils.MapperUtils;
+import com.phmc.bmapper.utils.MappingContext;
 import com.phmc.bmapper.utils.MappingType;
 import org.springframework.context.ApplicationContext;
 
@@ -11,8 +12,7 @@ import java.util.Set;
 
 public class MappingDataBuilder {
     private final Set<MappingType> mappingTypes;
-    private Class<?> mainClass;
-    private ApplicationContext context;
+    private MappingContext mappingContext;
     private Map<String, Map<ChainPropertyDescriptor, ChainPropertyDescriptor>> mappedObjects;
 
     public MappingDataBuilder() {
@@ -31,11 +31,15 @@ public class MappingDataBuilder {
     }
 
     public void setMainClass(Class<?> mainClass) {
-        this.mainClass = mainClass;
+        this.mappingContext.setMainClass(mainClass);
     }
 
     public void setContext(ApplicationContext context) {
-        this.context = context;
+        this.mappingContext.setContext(context);
+    }
+
+    public void setMappingContext(MappingContext mappingContext) {
+        this.mappingContext = mappingContext;
     }
 
     public void setMappedObjects(Map<String, Map<ChainPropertyDescriptor, ChainPropertyDescriptor>> mappedObjects) {
@@ -47,6 +51,6 @@ public class MappingDataBuilder {
     }
 
     public void initMappingProps() {
-        this.setMappedObjects(MapperUtils.getMappedProperties(this.mainClass, this.mappingTypes));
+        this.setMappedObjects(MapperUtils.getMappedProperties(this.mappingContext, this.mappingTypes));
     }
 }

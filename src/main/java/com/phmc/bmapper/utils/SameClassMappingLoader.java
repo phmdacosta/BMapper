@@ -3,7 +3,6 @@ package com.phmc.bmapper.utils;
 import com.phmc.bmapper.ChainPropertyDescriptor;
 import com.phmc.bmapper.PropertyDescriptor;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.context.ApplicationContext;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,16 +10,8 @@ import java.util.List;
 import java.util.Map;
 
 public class SameClassMappingLoader implements MappingLoader {
-
     @Override
-    @NotNull
-    public Map<String, Map<ChainPropertyDescriptor, ChainPropertyDescriptor>> getMappedProperties(ApplicationContext context) {
-        return new HashMap<>();
-    }
-
-    @Override
-    @NotNull
-    public Map<String, Map<ChainPropertyDescriptor, ChainPropertyDescriptor>> getMappedProperties(Class<?> mainClass) {
+    public @NotNull Map<String, Map<ChainPropertyDescriptor, ChainPropertyDescriptor>> getMappedProperties(MappingContext mappingContext) {
         return new HashMap<>();
     }
 

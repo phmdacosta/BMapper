@@ -5,6 +5,7 @@ import com.phmc.bmapper.BMapper;
 import com.phmc.bmapper.ChainPropertyDescriptor;
 import com.phmc.bmapper.PropertyDescriptor;
 import com.phmc.bmapper.utils.MapperUtils;
+import com.phmc.bmapper.utils.MappingContext;
 import com.phmc.bmapper.utils.MappingLoader;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationContext;
@@ -17,106 +18,13 @@ import java.util.*;
 
 public class XmlMappingLoader implements MappingLoader {
     @Override
-    public @NotNull Map<String, Map<ChainPropertyDescriptor, ChainPropertyDescriptor>> getMappedProperties(ApplicationContext context) {
-//        Map<String, Map<ChainPropertyDescriptor, ChainPropertyDescriptor>> mappedObjects = new HashMap<>();
-//
-//        Set<Document> xmlDocuments = XmlFileLoader.loadXmlDocuments();
-//
-//        for (Document document : xmlDocuments) {
-//            document.getDocumentElement().normalize();
-//
-//            NodeList mappingNodeList = document.getElementsByTagName(XmlSchemaTag.MAPPING.getTag());
-//
-//            for (int indexMapping = 0; indexMapping < mappingNodeList.getLength(); indexMapping++) {
-//                Node mappingNode = mappingNodeList.item(indexMapping);
-//
-//                if (mappingNode.getNodeType() == Node.ELEMENT_NODE) {
-//                    Element mappingElement = (Element)mappingNode;
-//                    ChainPropertyDescriptor chainPropDescClassA = getChainPropertyDescriptor(mappingElement, XmlSchemaTag.A);
-//                    ChainPropertyDescriptor chainPropDescClassB = getChainPropertyDescriptor(mappingElement, XmlSchemaTag.B);
-//
-//                    // Create mapping properties from class A to class B
-//                    Map<ChainPropertyDescriptor, ChainPropertyDescriptor> chainPropDescMapAToB = new HashMap<>();
-//                    chainPropDescMapAToB.put(chainPropDescClassA, chainPropDescClassB);
-//                    mappedObjects.put(
-//                            MapperUtils.getMappingKeyName(chainPropDescClassA.getObjClass(), chainPropDescClassB.getObjClass()),
-//                            chainPropDescMapAToB);
-//
-//                    // Create mapping properties from class B to class A
-//                    Map<ChainPropertyDescriptor, ChainPropertyDescriptor> chainPropDescMapBToA = new HashMap<>();
-//                    chainPropDescMapBToA.put(chainPropDescClassA, chainPropDescClassB);
-//                    mappedObjects.put(
-//                            MapperUtils.getMappingKeyName(chainPropDescClassB.getObjClass(), chainPropDescClassA.getObjClass()),
-//                            chainPropDescMapBToA);
-//                }
-//            }
-//        }
-
-        return getMappedProperties(context.getClass());
-    }
-
-    @Override
-    public @NotNull Map<String, Map<ChainPropertyDescriptor, ChainPropertyDescriptor>> getMappedProperties(Class<?> mainClass) {
-//        Map<String, Map<ChainPropertyDescriptor, ChainPropertyDescriptor>> mappedObjects = new HashMap<>();
-
+    public @NotNull Map<String, Map<ChainPropertyDescriptor, ChainPropertyDescriptor>> getMappedProperties(final MappingContext mappingContext) {
         Set<Document> xmlDocuments = XmlFileLoader.loadXmlDocuments();
-
-//        for (Document document : xmlDocuments) {
-//            document.getDocumentElement().normalize();
-//
-//            NodeList mappingNodeList = document.getElementsByTagName(XmlSchemaTag.MAPPING.getTag());
-//
-//            for (int indexMapping = 0; indexMapping < mappingNodeList.getLength(); indexMapping++) {
-//                Node mappingNode = mappingNodeList.item(indexMapping);
-//
-//                if (mappingNode.getNodeType() == Node.ELEMENT_NODE) {
-//                    Element mappingElement = (Element)mappingNode;
-//
-////                    getMappedProperties(mappingElement);
-//
-//
-//
-//
-//
-//
-//
-//
-//                    ChainPropertyDescriptor chainPropDescClassA = getChainPropertyDescriptor(mappingElement, XmlSchemaTag.A);
-//                    ChainPropertyDescriptor chainPropDescClassB = getChainPropertyDescriptor(mappingElement, XmlSchemaTag.B);
-//
-//                    // Mapping same class A
-//
-//                    updateMap(mappedObjects, mappingElement);
-//
-//                    // Mapping same class B
-//                    Log.info(BMapper.class,
-//                            String.format("Initiate mapping: %s -> %s",
-//                                    chainPropDescClassB.getObjClass().getSimpleName(),
-//                                    chainPropDescClassB.getObjClass().getSimpleName()));
-//                    updateMap(mappedObjects, mappingElement);
-//
-//                    // Create mapping properties from class A to class B
-//                    Log.info(BMapper.class,
-//                            String.format("Initiate mapping: %s -> %s",
-//                                    chainPropDescClassA.getObjClass().getSimpleName(),
-//                                    chainPropDescClassB.getObjClass().getSimpleName()));
-//                    updateMap(mappedObjects, mappingElement);
-//
-//                    // Create mapping properties from class B to class A
-//                    Log.info(BMapper.class,
-//                            String.format("Initiate mapping: %s -> %s",
-//                                    chainPropDescClassB.getObjClass().getSimpleName(),
-//                                    chainPropDescClassA.getObjClass().getSimpleName()));
-//                    updateMap(mappedObjects, mappingElement);
-//                }
-//            }
-//        }
-
         return getMappedProperties(xmlDocuments);
     }
 
     @Override
-    public @NotNull Map<String, Map<ChainPropertyDescriptor, ChainPropertyDescriptor>> getMappedProperties(Class<?> classA, Class<?> classB) {
+    public @NotNull Map<String, Map<ChainPropertyDescriptor, ChainPropertyDescriptor>> getMappedProperties(final Class<?> classA, final Class<?> classB) {
         Set<Document> xmlDocuments = XmlFileLoader.loadXmlDocuments(classA.getSimpleName());
         if (xmlDocuments.isEmpty()) {
             xmlDocuments = XmlFileLoader.loadXmlDocuments(classB.getSimpleName());

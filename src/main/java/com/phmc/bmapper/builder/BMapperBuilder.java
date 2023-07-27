@@ -1,6 +1,7 @@
 package com.phmc.bmapper.builder;
 
 import com.phmc.bmapper.BMapper;
+import com.phmc.bmapper.utils.MappingContext;
 import com.phmc.bmapper.utils.MappingType;
 import org.springframework.context.ApplicationContext;
 
@@ -10,15 +11,27 @@ public class BMapperBuilder {
     private boolean lazyMappings;
 
     // STATIC METHODS
-    public static BMapperBuilder init(ApplicationContext context) {
+    public static BMapperBuilder init(final ApplicationContext context) {
         BMapperBuilder builder = new BMapperBuilder();
         builder.helper = builder.initHelper(context);
         return builder;
     }
 
-    public static BMapperBuilder init(Class<?> mainClass) {
+    public static BMapperBuilder init(final Class<?> mainClass) {
         BMapperBuilder builder = new BMapperBuilder();
         builder.helper = builder.initHelper(mainClass);
+        return builder;
+    }
+
+    public static BMapperBuilder init(final Package targetPackage) {
+        BMapperBuilder builder = new BMapperBuilder();
+        builder.helper = builder.initHelper(targetPackage);
+        return builder;
+    }
+
+    public static BMapperBuilder init(final MappingContext mappingContext) {
+        BMapperBuilder builder = new BMapperBuilder();
+        builder.helper = builder.initHelper(mappingContext);
         return builder;
     }
 
@@ -53,18 +66,28 @@ public class BMapperBuilder {
         return mapper;
     }
 
-    private BMapperBuilderHelper initHelper(ApplicationContext context) {
-        BMapperBuilderHelper helper = new BMapperBuilderHelper();
-        helper.setMappingDataBuilder(new MappingDataBuilder());
-        helper.getMappingDataBuilder().setContext(context);
-        helper.getMappingDataBuilder().addMappingTypes(MappingType.ANNOTATION);
-        return helper;
+    private BMapperBuilderHelper initHelper(final ApplicationContext context) {
+        MappingContext mappingContext = new MappingContext();
+        mappingContext.setContext(context);
+        return initHelper(mappingContext);
     }
 
-    private BMapperBuilderHelper initHelper(Class<?> mainClass) {
+    private BMapperBuilderHelper initHelper(final Class<?> mainClass) {
+        MappingContext mappingContext = new MappingContext();
+        mappingContext.setMainClass(mainClass);
+        return initHelper(mappingContext);
+    }
+
+    private BMapperBuilderHelper initHelper(final Package targetPackage) {
+        MappingContext mappingContext = new MappingContext();
+        mappingContext.setTargetPackage(targetPackage);
+        return initHelper(mappingContext);
+    }
+
+    private BMapperBuilderHelper initHelper(final MappingContext mappingContext) {
         BMapperBuilderHelper helper = new BMapperBuilderHelper();
         helper.setMappingDataBuilder(new MappingDataBuilder());
-        helper.getMappingDataBuilder().setMainClass(mainClass);
+        helper.getMappingDataBuilder().setMappingContext(mappingContext);
         helper.getMappingDataBuilder().addMappingTypes(MappingType.ANNOTATION);
         return helper;
     }

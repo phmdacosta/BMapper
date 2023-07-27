@@ -1,11 +1,13 @@
 package com.phmc.bmapper.annotation;
 
 import com.pedrocosta.springutils.ClassFinder;
+import com.pedrocosta.springutils.ClassUtils;
 import com.pedrocosta.springutils.output.Log;
 import com.phmc.bmapper.BMapper;
 import com.phmc.bmapper.ChainPropertyDescriptor;
 import com.phmc.bmapper.PropertyDescriptor;
 import com.phmc.bmapper.utils.MapperUtils;
+import com.phmc.bmapper.utils.MappingContext;
 import com.phmc.bmapper.utils.MappingLoader;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationContext;
@@ -17,28 +19,28 @@ import java.util.List;
 import java.util.Map;
 
 public class AnnotationMappingLoader implements MappingLoader {
-
     @Override
-    public @NotNull Map<String, Map<ChainPropertyDescriptor, ChainPropertyDescriptor>> getMappedProperties(ApplicationContext context) {
-        Map<Class<?>, Class<?>> eligibleMappingBeans = getAllEligibleMapping(context);
-        return getMappedProperties(eligibleMappingBeans);
+    public @NotNull Map<String, Map<ChainPropertyDescriptor, ChainPropertyDescriptor>> getMappedProperties(final MappingContext mappingContext) {
+        Map<Class<?>, Class<?>> eligibleMappingBeans = getAllEligibleMapping(mappingContext.getContext());
+        if (eligibleMappingBeans.isEmpty()) {
+            eligibleMappingBeans = getAllEligibleMapping(mappingContext.getTargetPackage());
+        }
+        return _getMappedProperties(eligibleMappingBeans);
     }
 
     @Override
-    public @NotNull Map<String, Map<ChainPropertyDescriptor, ChainPropertyDescriptor>> getMappedProperties(Class<?> mainClass) {
-        Map<Class<?>, Class<?>> eligibleMappingBeans = getAllEligibleMapping(mainClass);
-        return getMappedProperties(eligibleMappingBeans);
-    }
-
-    @Override
-    public @NotNull Map<String, Map<ChainPropertyDescriptor, ChainPropertyDescriptor>> getMappedProperties(Class<?> classA, Class<?> classB) {
+    public @NotNull Map<String, Map<ChainPropertyDescriptor, ChainPropertyDescriptor>> getMappedProperties(final Class<?> classA, final Class<?> classB) {
         Map<Class<?>, Class<?>> eligibleMappingBeans = getEligibleMapping(classA, classB);
-        return getMappedProperties(eligibleMappingBeans);
+        return _getMappedProperties(eligibleMappingBeans);
     }
 
     @NotNull
-    private Map<String, Map<ChainPropertyDescriptor, ChainPropertyDescriptor>> getMappedProperties(Map<Class<?>, Class<?>> eligibleMappingBeans) {
+    private Map<String, Map<ChainPropertyDescriptor, ChainPropertyDescriptor>> _getMappedProperties(Map<Class<?>, Class<?>> eligibleMappingBeans) {
         Map<String, Map<ChainPropertyDescriptor, ChainPropertyDescriptor>> mappedObjects = new HashMap<>();
+
+        if (eligibleMappingBeans.isEmpty()) {
+            Log.warn(BMapper.class, String.format("Could not find any class with annotation %s", getAnnotClassForMappingClass().getSimpleName()));
+        }
 
         for (Map.Entry<Class<?>, Class<?>> mappingBeans : eligibleMappingBeans.entrySet()) {
             // Mapping same class A
@@ -69,33 +71,39 @@ public class AnnotationMappingLoader implements MappingLoader {
 
     private Map<Class<?>, Class<?>> getAllEligibleMapping(ApplicationContext context) {
         Map<Class<?>, Class<?>> qualifiedMapping = new HashMap<>();
-        Class<MappingClass> annotationClass = MappingClass.class;
+
+        if (context == null) {
+            return qualifiedMapping;
+        }
 
         try {
-            List<Class<?>> beans = ClassFinder.findAllByAnnotation(context, annotationClass);
+            List<Class<?>> beans = ClassFinder.findAllByAnnotation(context, getAnnotClassForMappingClass());
             for (Class<?> bean : beans) {
-                qualifiedMapping.put(bean, bean.getAnnotation(annotationClass).targetClass());
+                qualifiedMapping.put(bean, bean.getAnnotation(getAnnotClassForMappingClass()).targetClass());
             }
         } catch (ClassNotFoundException e) {
             Log.warn(BMapper.class, String.format("Could not find any class with %s annotation",
-                    annotationClass.getSimpleName()));
+                    getAnnotClassForMappingClass().getSimpleName()));
         }
 
         return qualifiedMapping;
     }
 
-    private Map<Class<?>, Class<?>> getAllEligibleMapping(Class<?> mainClass) {
+    private Map<Class<?>, Class<?>> getAllEligibleMapping(Package targetPackage) {
         Map<Class<?>, Class<?>> qualifiedMapping = new HashMap<>();
-        Class<MappingClass> annotationClass = MappingClass.class;
+
+        if (targetPackage == null) {
+            return qualifiedMapping;
+        }
 
         try {
-            List<Class<?>> beans = ClassFinder.findAllByAnnotation(annotationClass, mainClass.getPackage());
+            List<Class<?>> beans = ClassFinder.findAllByAnnotation(getAnnotClassForMappingClass(), targetPackage);
             for (Class<?> bean : beans) {
-                qualifiedMapping.put(bean, bean.getAnnotation(annotationClass).targetClass());
+                qualifiedMapping.put(bean, bean.getAnnotation(getAnnotClassForMappingClass()).targetClass());
             }
         } catch (ClassNotFoundException e) {
             Log.warn(BMapper.class, String.format("Could not find any class with %s annotation",
-                    annotationClass.getSimpleName()));
+                    getAnnotClassForMappingClass().getSimpleName()));
         }
 
         return qualifiedMapping;
@@ -103,17 +111,16 @@ public class AnnotationMappingLoader implements MappingLoader {
 
     private Map<Class<?>, Class<?>> getEligibleMapping(Class<?> classA, Class<?> classB) {
         Map<Class<?>, Class<?>> qualifiedMapping = new HashMap<>();
-        Class<MappingClass> annotationClass = MappingClass.class;
 
         Class<?> mappedByAnnotClass = classA;
-        Annotation annotMappingClass = classA.getAnnotation(annotationClass);
+        Annotation annotMappingClass = classA.getAnnotation(getAnnotClassForMappingClass());
         if (annotMappingClass == null) {
             mappedByAnnotClass = classB;
-            annotMappingClass = classB.getAnnotation(annotationClass);
+            annotMappingClass = classB.getAnnotation(getAnnotClassForMappingClass());
         }
 
         if (annotMappingClass != null) {
-            qualifiedMapping.put(mappedByAnnotClass, mappedByAnnotClass.getAnnotation(annotationClass).targetClass());
+            qualifiedMapping.put(mappedByAnnotClass, mappedByAnnotClass.getAnnotation(getAnnotClassForMappingClass()).targetClass());
         }
 
         return qualifiedMapping;
@@ -130,7 +137,7 @@ public class AnnotationMappingLoader implements MappingLoader {
         boolean isRefClassFromClass = false;
         Class<?> refClass;
         Class<?> oppositeClass;
-        if (MapperUtils.hasMappingClassAnnotation(fromClass)) {
+        if (hasMappingClassAnnotation(fromClass)) {
             refClass = fromClass;
             oppositeClass = toClass;
             isRefClassFromClass = true;
@@ -186,5 +193,13 @@ public class AnnotationMappingLoader implements MappingLoader {
         } catch (IllegalAccessException | InvocationTargetException
                  | NoSuchMethodException | NullPointerException ignored) {}
         return annotFieldName;
+    }
+
+    private Class<MappingClass> getAnnotClassForMappingClass() {
+        return MappingClass.class;
+    }
+
+    private boolean hasMappingClassAnnotation(Class<?> clazz) {
+        return ClassUtils.hasAnnotation(clazz, getAnnotClassForMappingClass());
     }
 }
