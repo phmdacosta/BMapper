@@ -140,19 +140,18 @@ public class MapperUtils {
 
     public static PropertyDescriptor[] getPropertyDescriptors(Class<?> clazz) {
         java.beans.PropertyDescriptor[] propDescArr = BeanUtils.getPropertyDescriptors(clazz);
-        PropertyDescriptor[] result = new PropertyDescriptor[propDescArr.length];
-        for (int i = 0; i < propDescArr.length; i++) {
-            java.beans.PropertyDescriptor propDesc = propDescArr[i];
+        List<PropertyDescriptor> result = new ArrayList<>();
+        for (java.beans.PropertyDescriptor propDesc : propDescArr) {
             if (isValidPropertyDescriptor(propDesc)) {
                 Annotation annotation = getMappingAnnotation(propDesc);
                 try {
-                    result[i] = new PropertyDescriptor(propDesc, clazz, getInstance(clazz), annotation);
+                    result.add(new PropertyDescriptor(propDesc, clazz, getInstance(clazz), annotation));
                 } catch (IntrospectionException e) {
                     Log.error(BMapper.class, e);
                 }
             }
         }
-        return result;
+        return result.toArray(new PropertyDescriptor[0]);
     }
 
     public static ChainPropertyDescriptor buildChainPropertyDescriptor(Class<?> lookingClass, String fieldName) {

@@ -8,7 +8,6 @@ import com.phmc.bmapper.utils.MapperUtils;
 import com.phmc.bmapper.utils.MappingContext;
 import com.phmc.bmapper.utils.MappingLoader;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.context.ApplicationContext;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -138,10 +137,10 @@ public class XmlMappingLoader implements MappingLoader {
                     XmlMappingField xmlMappingField = new XmlMappingField();
                     xmlMappingField.setFieldType(fieldElement.getAttribute("type"));
 
-                    String propertyAName = fieldANodeList.item(0).getNodeValue();
+                    String propertyAName = fieldANodeList.item(0).getTextContent();
                     xmlMappingField.setFieldA(propertyAName);
 
-                    String propertyBName = fieldBNodeList.item(0).getNodeValue();
+                    String propertyBName = fieldBNodeList.item(0).getTextContent();
                     xmlMappingField.setFieldB(propertyBName);
 
                     xmlMappingClass.addMappingField(xmlMappingField);
@@ -187,6 +186,9 @@ public class XmlMappingLoader implements MappingLoader {
         if (clazz.equals(xmlMappingClass.getClassA())) {
             mappingSameClass.setClassA(xmlMappingClass.getClassA());
             mappingSameClass.setClassB(xmlMappingClass.getClassA());
+        } else {
+            mappingSameClass.setClassA(xmlMappingClass.getClassB());
+            mappingSameClass.setClassB(xmlMappingClass.getClassB());
         }
 
         return mappingSameClass;
