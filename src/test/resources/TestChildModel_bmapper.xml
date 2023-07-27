@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<bmapper xmlns:xsi="http://www.w3.org/2001/XMLSchema">
+    <mapping
+            class-a="com.phmc.bmapper.test.obj.TestChildModel"
+            class-b="com.phmc.bmapper.test.obj.TestChildView">
+        <same-fields/>
+    </mapping>
+</bmapper>
