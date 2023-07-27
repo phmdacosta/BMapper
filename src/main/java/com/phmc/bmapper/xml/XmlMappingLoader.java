@@ -89,13 +89,13 @@ public class XmlMappingLoader implements MappingLoader {
             PropertyDescriptor[] propDescArrClassB = MapperUtils.getPropertyDescriptors(xmlMappingClass.getClassB());
             int minSize = Math.min(propDescArrClassA.length, propDescArrClassB.length);
 
-            for (int i = 0; i < minSize; i++) {
-                PropertyDescriptor propDescClassA = propDescArrClassA[i];
-                PropertyDescriptor propDescClassB = propDescArrClassB[i];
-                if (propDescClassA.getName().equals(propDescClassB.getName())) {
-                    addToChainPropDescMap(resultMapChainPropDesc, xmlMappingClass.getClassA(), propDescClassA.getName(),
-                            xmlMappingClass.getClassB(), propDescClassB.getName());
-                }
+            for (final PropertyDescriptor propDescClassA : propDescArrClassA) {
+                Arrays.stream(propDescArrClassB)
+                        .filter(propDesc -> propDesc.getName().equals(propDescClassA.getName()))
+                        .findAny()
+                        .ifPresent(propDescClassB -> addToChainPropDescMap(resultMapChainPropDesc, xmlMappingClass.getClassA(), propDescClassA.getName(),
+                                xmlMappingClass.getClassB(), propDescClassB.getName()));
+
             }
         }
 
@@ -117,15 +117,16 @@ public class XmlMappingLoader implements MappingLoader {
             xmlMappingClass.setClassA(Class.forName(mappingElement.getAttribute("class-a")));
             xmlMappingClass.setClassB(Class.forName(mappingElement.getAttribute("class-b")));
 
+            NodeList sameFieldsNodeList = mappingElement.getElementsByTagName(XmlSchemaTag.SAME_FIELDS.getTag());
+            if (sameFieldsNodeList.getLength() > 0) {
+                xmlMappingClass.setHasSameFields(true);
+            }
+
             NodeList fieldNodeList = mappingElement.getElementsByTagName(XmlSchemaTag.FIELD.getTag());
             for (int indexField = 0; indexField < fieldNodeList.getLength(); indexField++) {
                 Node fieldNode = fieldNodeList.item(indexField);
                 if (fieldNode.getNodeType() == Node.ELEMENT_NODE) {
                     Element fieldElement = (Element)fieldNode;
-
-                    if (XmlSchemaTag.SAME_FIELDS.getTag().equals(fieldElement.getTagName())) {
-                        xmlMappingClass.setHasSameFields(true);
-                    }
 
                     NodeList fieldANodeList = fieldElement.getElementsByTagName(XmlSchemaTag.A.getTag());
                     NodeList fieldBNodeList = fieldElement.getElementsByTagName(XmlSchemaTag.B.getTag());
