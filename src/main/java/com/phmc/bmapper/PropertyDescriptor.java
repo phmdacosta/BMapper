@@ -1,5 +1,7 @@
 package com.phmc.bmapper;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.beans.IntrospectionException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -8,18 +10,18 @@ public class PropertyDescriptor extends java.beans.PropertyDescriptor {
     private Annotation propertyAnnotation;
     private Object beanInstance;
 
-    public PropertyDescriptor(java.beans.PropertyDescriptor propertyDescriptor, Object beanInstance, Annotation annotation) throws IntrospectionException {
+    public PropertyDescriptor(@NotNull java.beans.PropertyDescriptor propertyDescriptor, Object beanInstance, Annotation annotation) throws IntrospectionException {
         this(propertyDescriptor,
                 beanInstance != null ? beanInstance.getClass() : null,
                 beanInstance,
                 annotation);
     }
 
-    public PropertyDescriptor(java.beans.PropertyDescriptor propertyDescriptor, Class<?> beanClass, Object beanInstance, Annotation annotation) throws IntrospectionException {
+    public PropertyDescriptor(@NotNull java.beans.PropertyDescriptor propertyDescriptor, Class<?> beanClass, Object beanInstance, Annotation annotation) throws IntrospectionException {
         this(propertyDescriptor.getName(),
                 beanClass,
-                propertyDescriptor.getReadMethod().getName(),
-                propertyDescriptor.getWriteMethod().getName(),
+                propertyDescriptor.getReadMethod() != null ? propertyDescriptor.getReadMethod().getName() : null,
+                propertyDescriptor.getWriteMethod() != null ? propertyDescriptor.getWriteMethod().getName() : null,
                 annotation);
         this.beanInstance = beanInstance;
     }

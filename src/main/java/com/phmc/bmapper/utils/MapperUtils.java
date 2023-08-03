@@ -128,7 +128,7 @@ public class MapperUtils {
     public static PropertyDescriptor getPropertyDescriptor(Class<?> clazz, String propertyName) {
         java.beans.PropertyDescriptor propDesc = BeanUtils.getPropertyDescriptor(clazz, propertyName);
         if (propDesc != null) {
-            Annotation annotation = getMappingAnnotation(propDesc);
+            Annotation annotation = getMappingAnnotation(propDesc, clazz);
             try {
                 return new PropertyDescriptor(propDesc, clazz, getInstance(clazz), annotation);
             } catch (IntrospectionException e) {
@@ -143,7 +143,7 @@ public class MapperUtils {
         List<PropertyDescriptor> result = new ArrayList<>();
         for (java.beans.PropertyDescriptor propDesc : propDescArr) {
             if (isValidPropertyDescriptor(propDesc)) {
-                Annotation annotation = getMappingAnnotation(propDesc);
+                Annotation annotation = getMappingAnnotation(propDesc, clazz);
                 try {
                     result.add(new PropertyDescriptor(propDesc, clazz, getInstance(clazz), annotation));
                 } catch (IntrospectionException e) {
@@ -190,28 +190,33 @@ public class MapperUtils {
         return null;
     }
 
-    public static Annotation getMappingAnnotation(java.beans.PropertyDescriptor propertyDescriptor) {
+    public static Annotation getMappingAnnotation(java.beans.PropertyDescriptor propertyDescriptor, Class<?> clazz) {
+        Annotation result = null;
         if (isValidPropertyDescriptor(propertyDescriptor)) {
-            Class<?> clazz = propertyDescriptor.getReadMethod().getDeclaringClass();
             // Search in fields first
             try {
                 Field field = clazz.getDeclaredField(propertyDescriptor.getName());
-                return hasMappingAnnotation(field) ? getMappingAnnotation(field) : null;
-            } catch (NoSuchFieldException ignore) {}
-            // Search at getter
-            for (Annotation annotation : propertyDescriptor.getReadMethod().getAnnotations()) {
-                if (AnnotationMappingType.has(annotation.annotationType())) {
-                    return annotation;
+                result = hasMappingAnnotation(field) ? getMappingAnnotation(field) : null;
+            } catch (NoSuchFieldException ignore) {
+                // Search at getter
+                if (propertyDescriptor.getReadMethod() != null) {
+                    for (Annotation annotation : propertyDescriptor.getReadMethod().getAnnotations()) {
+                        if (AnnotationMappingType.has(annotation.annotationType())) {
+                            result = annotation;
+                        }
+                    }
                 }
-            }
-            // Search at setter
-            for (Annotation annotation : propertyDescriptor.getWriteMethod().getAnnotations()) {
-                if (AnnotationMappingType.has(annotation.annotationType())) {
-                    return annotation;
+                // Search at setter
+                if (propertyDescriptor.getWriteMethod() != null) {
+                    for (Annotation annotation : propertyDescriptor.getWriteMethod().getAnnotations()) {
+                        if (AnnotationMappingType.has(annotation.annotationType())) {
+                            result = annotation;
+                        }
+                    }
                 }
             }
         }
-        return null;
+        return result;
     }
 
     /**
