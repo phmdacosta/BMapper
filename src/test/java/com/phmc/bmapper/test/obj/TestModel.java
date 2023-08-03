@@ -12,6 +12,7 @@ public class TestModel {
     private TestChildModel child;
     private List<TestChildModel> children = new ArrayList<>();
     private Map<Integer, TestChildModel> childrenMap = new HashMap<>();
+    private String abc;
 
     public long getId() {
         return id;
@@ -59,5 +60,13 @@ public class TestModel {
 
     public void setChildrenMap(Map<Integer, TestChildModel> childrenMap) {
         this.childrenMap = childrenMap;
+    }
+
+    public String getNamePlusChildName() {
+        return this.name + " + " +  child.getName();
+    }
+
+    public void setCompleteName(String completeName) {
+        this.name = completeName;
     }
 }
