@@ -5,30 +5,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class TestModel {
-    private long id;
-    private String name;
+public class TestModel extends TestParentModel {
     private boolean bool;
     private TestChildModel child;
     private List<TestChildModel> children = new ArrayList<>();
     private Map<Integer, TestChildModel> childrenMap = new HashMap<>();
     private String abc;
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
 
     public boolean isBool() {
         return bool;
@@ -63,10 +45,10 @@ public class TestModel {
     }
 
     public String getNamePlusChildName() {
-        return this.name + " + " +  child.getName();
+        return this.getName() + " + " +  child.getName();
     }
 
     public void setCompleteName(String completeName) {
-        this.name = completeName;
+        this.setName(completeName);
     }
 }

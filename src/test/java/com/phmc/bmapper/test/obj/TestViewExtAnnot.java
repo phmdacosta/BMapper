@@ -18,7 +18,7 @@ public class TestViewExtAnnot {
     private TestChildView childView;
     @MappingField(name = "child.name")
     private String childViewName;
-    @MappingCollection(name = "children", resultElementClass = TestChildView.class)
+    @MappingCollection(name = "children", elementType = TestChildView.class)
     private List<TestChildView> viewChildren = new ArrayList<>();
     @MappingMap(name = "childrenMap", resultValueClass = TestChildView.class)
     private Map<Integer, TestChildView> viewChildrenMap = new HashMap<>();

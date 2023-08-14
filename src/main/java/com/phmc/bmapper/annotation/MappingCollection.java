@@ -7,5 +7,5 @@ import java.lang.annotation.*;
 @Documented
 public @interface MappingCollection {
     String name();
-    Class<?> resultElementClass();
+    Class<?> elementType();
 }

@@ -84,6 +84,18 @@ public class BMapperTest {
         TestModel mappedModel = bMapper.map(view, TestModel.class);
 
         //Assertions
+        assertNotNull(mappedView);
+        assertNotNull(mappedView.getChildren());
+        assertFalse(mappedView.getChildren().isEmpty());
+        assertNotNull(mappedView.getChildrenMap());
+        assertFalse(mappedView.getChildrenMap().isEmpty());
+
+        assertNotNull(mappedModel);
+        assertNotNull(mappedModel.getChildren());
+        assertFalse(mappedModel.getChildren().isEmpty());
+        assertNotNull(mappedModel.getChildrenMap());
+        assertFalse(mappedModel.getChildrenMap().isEmpty());
+
         for (TestChildView mappedChildView : mappedView.getChildren()) {
             Collection<?> found = model.getChildren().stream().filter(
                     childModel -> childModel.getName().equals(mappedChildView.getName())).collect(Collectors.toList());

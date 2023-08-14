@@ -19,7 +19,7 @@ public class TestViewAnnot {
     private TestChildView childView;
     @MappingField(name = "child.name")
     private String childViewName;
-    @MappingCollection(name = "children", resultElementClass = TestChildView.class)
+    @MappingCollection(name = "children", elementType = TestChildView.class)
     private List<TestChildView> childrenView = new ArrayList<>();
     @MappingMap(name = "childrenMap", resultValueClass = TestChildView.class)
     private Map<Integer, TestChildView> childrenViewMap = new HashMap<>();
