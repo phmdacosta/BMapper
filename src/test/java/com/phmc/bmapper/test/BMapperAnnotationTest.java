@@ -6,8 +6,7 @@ import com.phmc.bmapper.test.obj.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -218,6 +217,65 @@ public class BMapperAnnotationTest {
                     .findFirst().orElse(null);
             assertNotNull(found);
             assertEquals(testModel_C.getName(), found.getName());
+        }
+    }
+
+    @Test
+    public void test_DTOMapping_unmodifiableCollectionFields_success() {
+        TestAnnotModel_H testAnnotModelH_1 = new TestAnnotModel_H();
+        testAnnotModelH_1.setStr("MODEL_H_STR_1");
+        testAnnotModelH_1.setBool(true);
+        testAnnotModelH_1.setNumber(5684D);
+
+        TestAnnotModel_H testAnnotModelH_2 = new TestAnnotModel_H();
+        testAnnotModelH_2.setStr("MODEL_H_STR_2");
+        testAnnotModelH_2.setBool(true);
+        testAnnotModelH_2.setNumber(5684D);
+
+        TestAnnotModel_H testAnnotModelH_3 = new TestAnnotModel_H();
+        testAnnotModelH_3.setStr("MODEL_H_STR_3");
+        testAnnotModelH_3.setBool(true);
+        testAnnotModelH_3.setNumber(5684D);
+
+        List<TestAnnotModel_H> list = new ArrayList<>();
+        list.add(testAnnotModelH_1);
+        list.add(testAnnotModelH_2);
+        list.add(testAnnotModelH_3);
+
+        Set<TestAnnotModel_H> set = new HashSet<>();
+        set.add(testAnnotModelH_1);
+        set.add(testAnnotModelH_2);
+        set.add(testAnnotModelH_3);
+
+        TestAnnotModel_F testAnnotModelF = new TestAnnotModel_F();
+        testAnnotModelF.setUnmodifiableList(Collections.unmodifiableList(list));
+        testAnnotModelF.setUnmodifiableSet(Collections.unmodifiableSet(set));
+
+        TestAnnotModel_F_Dto testAnnotModel_F_Dto = bMapper.map(testAnnotModelF, TestAnnotModel_F_Dto.class);
+
+        assertNotNull(testAnnotModel_F_Dto);
+        assertFalse(testAnnotModel_F_Dto.getUnmodifiableList().isEmpty());
+        assertEquals(list.size(), testAnnotModel_F_Dto.getUnmodifiableList().size());
+
+        assertFalse(testAnnotModel_F_Dto.getUnmodifiableSet().isEmpty());
+        assertEquals(set.size(), testAnnotModel_F_Dto.getUnmodifiableSet().size());
+
+        for (TestAnnotModel_H_Dto testModel_H_Dto : testAnnotModel_F_Dto.getUnmodifiableList()) {
+            TestAnnotModel_H found = testAnnotModelF.getUnmodifiableList().stream()
+                    .filter(modelH -> modelH.getStr().equals(testModel_H_Dto.getStr())
+                            && modelH.getNumber().equals(testModel_H_Dto.getNumber())
+                            && (modelH.isBool() && testModel_H_Dto.isBool()))
+                    .findFirst().orElse(null);
+            assertNotNull(found);
+        }
+
+        for (TestAnnotModel_H_Dto testModel_H_Dto : testAnnotModel_F_Dto.getUnmodifiableSet()) {
+            TestAnnotModel_H found = testAnnotModelF.getUnmodifiableSet().stream()
+                    .filter(modelH -> modelH.getStr().equals(testModel_H_Dto.getStr())
+                            && modelH.getNumber().equals(testModel_H_Dto.getNumber())
+                            && (modelH.isBool() && testModel_H_Dto.isBool()))
+                    .findFirst().orElse(null);
+            assertNotNull(found);
         }
     }
 }
