@@ -3,7 +3,7 @@ Bean mapper
 
 ## Version
 
-v1.0.1
+v1.1.3
 
 ### Installing
 
@@ -15,19 +15,9 @@ Add the repository url in your project like this:
 <dependency>
   <groupId>com.phmc</groupId>
   <artifactId>BMapper</artifactId>
-  <version>1.0.1</version>
+  <version>1.1.3</version>
 </dependency>
 ```
-
-## Initialize
-
-<code>
-    // Initializing BMapper <br>
-    BMapper bMapper = BMapperBuilder.init(MyApplication.class).build();
-
-    // Mapping classes
-    MyDTO mappedDto = bMapper.map(MyModel, MyDTO.class);
-</code>
 
 ## How to use
 
