@@ -21,14 +21,14 @@ Add the repository url in your project like this:
 
 ## How to use
 
-Read the [HOW_TO_USE](https://github.com/phmdacosta/cachesmith/blob/master/HOW_TO_USE.md) to find details how to use the library.
+Read the [HOW_TO_USE](https://github.com/phmdacosta/BMapper/blob/master/HOW_TO_USE.md) to find details how to use the library.
 
 ## Authors
 
 **Pedro da Costa** - *Initial work*
 
-See also the list of [contributors](https://github.com/phmdacosta/cachesmith/graphs/contributors) who participated in this project.
+See also the list of [contributors](https://github.com/phmdacosta/BMapper/graphs/contributors) who participated in this project.
 
 ## License
 
-CacheSmith is licensed under [MIT License](https://github.com/phmdacosta/cachesmith/blob/master/LICENSE)
+CacheSmith is licensed under [MIT License](https://github.com/phmdacosta/BMapper/blob/master/LICENSE)
