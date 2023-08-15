@@ -3,6 +3,15 @@ package com.phmc.bmapper;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class serves to house the entire chain of properties up to the target property.<br><br>
+ * Ex: There is a DTO with the field {@code personName}, and we want to map this field to a property called
+ * {@code name} inside a {@code Person} object, which consequently is contained in our model,
+ * or persistence object.<br>
+ * A chain of properties will be built up to the {@code name} property on {@code Person},
+ * a list containing -> {@code [ person, name ]}. <br>
+ * This list will then be scanned by the mapper to find the path to the {@code name} property.
+ */
 public class ChainPropertyDescriptor {
     private Class<?> objClass;
     private final List<PropertyDescriptor> chain;

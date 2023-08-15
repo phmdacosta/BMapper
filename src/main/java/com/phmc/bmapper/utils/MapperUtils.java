@@ -14,6 +14,9 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
 
+/**
+ * Utility class for BMapper
+ */
 public class MapperUtils {
 
     /**
@@ -191,8 +194,8 @@ public class MapperUtils {
     /**
      * Create a chained property descriptors.
      * See: {@link }
-     * @param lookingClass
-     * @param fieldName
+     * @param lookingClass  Class of properties
+     * @param fieldName     Property name
      * @return
      */
     public static ChainPropertyDescriptor buildChainPropertyDescriptor(Class<?> lookingClass, String fieldName) {
