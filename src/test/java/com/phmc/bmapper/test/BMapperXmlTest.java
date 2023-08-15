@@ -9,9 +9,8 @@ public class BMapperXmlTest extends BMapperTest {
     @BeforeEach
     public void setUp() {
         this.bMapper = BMapperBuilder
-                .init(BMapper.class)
+                .init()
                 .enableXmlMapping()
-                .disableAnnotationMapping()
                 .build();
     }
 
