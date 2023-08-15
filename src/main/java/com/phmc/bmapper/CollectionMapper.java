@@ -1,6 +1,7 @@
 package com.phmc.bmapper;
 
 import com.phmc.bmapper.builder.MappingDataBuilder;
+import com.phmc.bmapper.resolver.CollectionInstanceResolver;
 import com.phmc.bmapper.resolver.CollectionInstanceResolverFactory;
 
 import java.util.Collection;
@@ -14,8 +15,13 @@ public class CollectionMapper<FROM, TO> extends TypeMapper<FROM, TO> {
             throw new IllegalArgumentException("Source is not a Collection");
         }
 
-        TO result = (TO) CollectionInstanceResolverFactory
-                .create(from.getClass()).newInstance(from.getClass());
+        TO result;
+        try {
+            result = (TO) CollectionInstanceResolverFactory
+                    .create(from).newInstance(from.getClass());
+        } catch (InstantiationException e) {
+            result = null;
+        }
 
         if (((Collection<?>)from).isEmpty()) {
             return result;
