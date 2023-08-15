@@ -1,19 +1,22 @@
 package com.phmc.bmapper.utils;
 
-import com.pedrocosta.springutils.ClassUtils;
 import com.pedrocosta.springutils.output.Log;
 import com.phmc.bmapper.BMapper;
 import com.phmc.bmapper.ChainPropertyDescriptor;
 import com.phmc.bmapper.PropertyDescriptor;
 import com.phmc.bmapper.annotation.*;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.BeanUtils;
-import org.springframework.context.ApplicationContext;
 
+import javax.annotation.Nullable;
 import java.beans.IntrospectionException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
 
+/**
+ * Utility class for BMapper
+ */
 public class MapperUtils {
 
     /**
@@ -113,6 +116,12 @@ public class MapperUtils {
         return chainPropName;
     }
 
+    /**
+     * Checks if the field in annotation of one of the types contained in {@link AnnotationMappingType}.
+     *
+     * @param field Field
+     * @return  True if field has annotation, false otherwise.
+     */
     public static boolean hasMappingAnnotation(Field field) {
         for (AnnotationMappingType annotMapping : AnnotationMappingType.values()) {
             if (hasAnnotation(field, annotMapping.getAnnotationClass()))
@@ -121,23 +130,47 @@ public class MapperUtils {
         return false;
     }
 
+    /**
+     * Check if field has a specific annotation.
+     *
+     * @param field             Field to look
+     * @param annotationClass   Annotation to search
+     * @return  True if the field has the indicated annotation, false otherwise.
+     */
     public static boolean hasAnnotation(Field field, Class<? extends Annotation> annotationClass) {
         return field.getAnnotation(annotationClass) != null;
     }
 
+    /**
+     * Load property descriptor by the property name.
+     *
+     * @param clazz         Class to look
+     * @param propertyName  Property name
+     * @return  {@link PropertyDescriptor} of the property.
+     */
     public static PropertyDescriptor getPropertyDescriptor(Class<?> clazz, String propertyName) {
         java.beans.PropertyDescriptor propDesc = BeanUtils.getPropertyDescriptor(clazz, propertyName);
-        if (propDesc != null) {
+        if (isValidPropertyDescriptor(propDesc)) {
             Annotation annotation = getMappingAnnotation(propDesc, clazz);
             try {
-                return new PropertyDescriptor(propDesc, clazz, getInstance(clazz), annotation);
+                Class<?> elementType = propDesc.getPropertyType();
+                if (isCollection(elementType) || isMap(elementType)) {
+                    elementType = getElementType(clazz, propDesc);
+                }
+                return new PropertyDescriptor(propDesc, clazz, getInstance(clazz), annotation, elementType);
             } catch (IntrospectionException e) {
-                Log.error(BMapper.class, e);
+                Log.warn(BMapper.class, e.getMessage());
             }
         }
         return null;
     }
 
+    /**
+     * Load all property descriptors of the class.
+     *
+     * @param clazz Class to look
+     * @return  Array of all {@link PropertyDescriptor} from class.
+     */
     public static PropertyDescriptor[] getPropertyDescriptors(Class<?> clazz) {
         java.beans.PropertyDescriptor[] propDescArr = BeanUtils.getPropertyDescriptors(clazz);
         List<PropertyDescriptor> result = new ArrayList<>();
@@ -145,15 +178,26 @@ public class MapperUtils {
             if (isValidPropertyDescriptor(propDesc)) {
                 Annotation annotation = getMappingAnnotation(propDesc, clazz);
                 try {
-                    result.add(new PropertyDescriptor(propDesc, clazz, getInstance(clazz), annotation));
+                    Class<?> elementType = propDesc.getPropertyType();
+                    if (isCollection(elementType) || isMap(elementType)) {
+                        elementType = getElementType(clazz, propDesc);
+                    }
+                    result.add(new PropertyDescriptor(propDesc, clazz, getInstance(clazz), annotation, elementType));
                 } catch (IntrospectionException e) {
-                    Log.error(BMapper.class, e);
+                    Log.warn(BMapper.class, e.getMessage());
                 }
             }
         }
         return result.toArray(new PropertyDescriptor[0]);
     }
 
+    /**
+     * Create a chained property descriptors.
+     * See: {@link }
+     * @param lookingClass  Class of properties
+     * @param fieldName     Property name
+     * @return
+     */
     public static ChainPropertyDescriptor buildChainPropertyDescriptor(Class<?> lookingClass, String fieldName) {
         ChainPropertyDescriptor chainedProperty = new ChainPropertyDescriptor();
 
@@ -239,14 +283,22 @@ public class MapperUtils {
         return propertyDescriptor != null && !"class".equals(propertyDescriptor.getName());
     }
 
+    /**
+     * Get the type of method.
+     *
+     * @param method    Method
+     * @return  If method has parameters, returns the first parameter type.<br>
+     *          If the method has return, get its type.
+     */
     public static Class<?> getTypeOfMethod(Method method) {
         return method.getParameterTypes().length > 0 ? method.getParameterTypes()[0] : method.getReturnType();
     }
 
     /**
      * Build key name for mapping.
-     * @param fromClass
-     * @param toClass
+     *
+     * @param fromClass Class A
+     * @param toClass   Class B
      * @return  Key name: FromClassName>>ToClassName
      */
     public static String getMappingKeyName(final Class<?> fromClass, final Class<?> toClass) {
@@ -254,5 +306,70 @@ public class MapperUtils {
             return "";
         }
         return fromClass.getSimpleName() + ">>" + toClass.getSimpleName();
+    }
+
+    /**
+     * Check if a class is a collection.
+     *
+     * @param clazz Class to verify
+     * @return  True if it is a collection, false otherwise.
+     */
+    public static boolean isCollection(Class<?> clazz) {
+        return CollectionTypes.contains(clazz);
+    }
+
+    /**
+     * Check if a class is a map.
+     *
+     * @param clazz Class to verify
+     * @return  True if it is a map, false otherwise.
+     */
+    public static boolean isMap(Class<?> clazz) {
+        return MapTypes.contains(clazz);
+    }
+
+    /**
+     * Get all generic types of a property type.
+     *
+     * @param beanClass     Bean class of property
+     * @param propertyName  Name of the property whose type has generic types
+     * @return  Array of generic types.
+     */
+    @NotNull
+    public static Class<?>[] getAllGenericTypes(@NotNull Class<?> beanClass, String propertyName) {
+        List<Class<?>> allGenericTypes = new ArrayList<>();
+        try {
+            Field field = beanClass.getDeclaredField(propertyName);
+            if (MapperUtils.isCollection(field.getType()) || isMap(field.getType())) {
+                ParameterizedType fieldParameterizedType = (ParameterizedType) field.getGenericType();
+                for (Type type : fieldParameterizedType.getActualTypeArguments()) {
+                    allGenericTypes.add((Class<?>) type);
+                }
+            }
+        } catch (NoSuchFieldException e) {
+            if (beanClass.getSuperclass() != null) {
+                allGenericTypes = Arrays.asList(getAllGenericTypes(beanClass.getSuperclass(), propertyName));
+            }
+        }
+        return allGenericTypes.toArray(new Class<?>[0]);
+    }
+
+    /**
+     * Get all generic types of a property type.
+     *
+     * @param beanClass             Bean class of property
+     * @param propertyDescriptor    Property descriptor whose type has generic types
+     * @return  For collections, returns the only generic type. For maps, returns the generic type from value.
+     */
+    @Nullable
+    private static Class<?> getElementType(@NotNull Class<?> beanClass, @NotNull java.beans.PropertyDescriptor propertyDescriptor) {
+        Class<?>[] elementTypes = getAllGenericTypes(beanClass, propertyDescriptor.getName());
+        if (elementTypes.length > 0) {
+            if (isMap(propertyDescriptor.getPropertyType()) && elementTypes.length > 1) {
+                return elementTypes[1];
+            }
+            return elementTypes[0];
+        }
+        return null;
     }
 }

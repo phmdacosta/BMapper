@@ -51,22 +51,21 @@ public class ObjectMapper extends TypeMapper<Object, Object> {
             if (chainSetter != null) {
                 try {
                     if (chainSetter.size() > 0) {
-                        Object instanceSetter = null;
+                        Object instanceSetter = result;
                         for (int i = 0; i < (chainSetter.size() - 1); i++) {
                             PropertyDescriptor propertyDescSetter = chainSetter.get(i);
                             if (propertyDescSetter == null) {
                                 continue;
                             }
 
-                            instanceSetter = instanceSetter == null ? result : propertyDescSetter.getBeanInstance();
-
-                            Object resultFieldValue = propertyDescSetter.getReadMethod().invoke(instanceSetter);
-                            if (resultFieldValue == null) {
-                                propertyDescSetter.getWriteMethod().invoke(instanceSetter, MapperUtils.getInstance(propertyDescSetter.getPropertyType()));
+                            Object propertyValue = propertyDescSetter.getReadMethod().invoke(instanceSetter);
+                            if (propertyValue == null) {
+                                propertyValue = MapperUtils.getInstance(propertyDescSetter.getPropertyType());
+                                propertyDescSetter.getWriteMethod().invoke(instanceSetter, propertyValue);
                             }
+                            instanceSetter = propertyValue;
                         }
                         PropertyDescriptor propertyDescSetter = chainSetter.get(chainSetter.size() - 1);
-                        instanceSetter = instanceSetter == null ? result : propertyDescSetter.getBeanInstance();
 
                         Object instanceGetter = null;
                         Object fieldValue = null;
@@ -89,7 +88,8 @@ public class ObjectMapper extends TypeMapper<Object, Object> {
                         }
 
                         if (fieldValue != null && !ClassUtils.isSimpleProperty(fieldValue.getClass())) {
-                            fieldValue = ((TypeMapper<Object, Object>)loadMapper(fieldValue.getClass(), propertyDescSetter.getPropertyType())).doMapping(dataHelper, fieldValue, (Class<Object>) propertyDescSetter.getPropertyType());
+                            Class<Object> propTypeSetterClass = (Class<Object>) propertyDescSetter.getActualType();
+                            fieldValue = ((TypeMapper<Object, Object>)loadMapper(fieldValue.getClass(), propertyDescSetter.getPropertyType())).doMapping(dataHelper, fieldValue, propTypeSetterClass);
                         }
                         propertyDescSetter.getWriteMethod().invoke(instanceSetter, fieldValue);
                     }

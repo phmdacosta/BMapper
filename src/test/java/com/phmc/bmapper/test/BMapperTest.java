@@ -18,7 +18,8 @@ public class BMapperTest {
     @BeforeEach
     public void setUp() {
         this.bMapper = BMapperBuilder
-                .init(BMapper.class)
+                .init()
+                .enableAnnotationMapping(BMapper.class)
                 .build();
     }
 
@@ -83,7 +84,23 @@ public class BMapperTest {
         TestView mappedView = bMapper.map(model, TestView.class);
         TestModel mappedModel = bMapper.map(view, TestModel.class);
 
-        //Assertions
+        // Assertions
+        assertNotNull(mappedView);
+        assertNotNull(mappedView.getChildren());
+        assertFalse(mappedView.getChildren().isEmpty());
+        assertEquals(model.getChildren().size(), mappedView.getChildren().size());
+        assertNotNull(mappedView.getChildrenMap());
+        assertFalse(mappedView.getChildrenMap().isEmpty());
+        assertEquals(model.getChildrenMap().size(), mappedView.getChildrenMap().size());
+
+        assertNotNull(mappedModel);
+        assertNotNull(mappedModel.getChildren());
+        assertFalse(mappedModel.getChildren().isEmpty());
+        assertEquals(view.getChildren().size(), mappedModel.getChildren().size());
+        assertNotNull(mappedModel.getChildrenMap());
+        assertFalse(mappedModel.getChildrenMap().isEmpty());
+        assertEquals(view.getChildrenMap().size(), mappedModel.getChildrenMap().size());
+
         for (TestChildView mappedChildView : mappedView.getChildren()) {
             Collection<?> found = model.getChildren().stream().filter(
                     childModel -> childModel.getName().equals(mappedChildView.getName())).collect(Collectors.toList());
@@ -203,7 +220,23 @@ public class BMapperTest {
         TestViewAnnot mappedView = bMapper.map(model, TestViewAnnot.class);
         TestModel mappedModel = bMapper.map(view, TestModel.class);
 
-        //Assertions
+        // Assertions
+        assertNotNull(mappedView);
+        assertNotNull(mappedView.getChildrenView());
+        assertFalse(mappedView.getChildrenView().isEmpty());
+        assertEquals(model.getChildren().size(), mappedView.getChildrenView().size());
+        assertNotNull(mappedView.getChildrenViewMap());
+        assertFalse(mappedView.getChildrenViewMap().isEmpty());
+        assertEquals(model.getChildrenMap().size(), mappedView.getChildrenViewMap().size());
+
+        assertNotNull(mappedModel);
+        assertNotNull(mappedModel.getChildren());
+        assertFalse(mappedModel.getChildren().isEmpty());
+        assertEquals(view.getChildrenView().size(), mappedModel.getChildren().size());
+        assertNotNull(mappedModel.getChildrenMap());
+        assertFalse(mappedModel.getChildrenMap().isEmpty());
+        assertEquals(view.getChildrenViewMap().size(), mappedModel.getChildrenMap().size());
+
         for (TestChildView mappedChildView : mappedView.getChildrenView()) {
             Collection<?> found = model.getChildren().stream().filter(
                     childModel -> childModel.getName().equals(mappedChildView.getName())).collect(Collectors.toList());
@@ -259,6 +292,12 @@ public class BMapperTest {
         assertEquals(model.getName(), mapped.getName());
         assertEquals(model.isBool(), mapped.isBool());
         assertEquals(model.getChild().getName(), mapped.getChild().getName());
+        assertNotNull(mapped.getChildren());
+        assertFalse(mapped.getChildren().isEmpty());
+        assertEquals(model.getChildren().size(), mapped.getChildren().size());
+        assertNotNull(mapped.getChildrenMap());
+        assertFalse(mapped.getChildrenMap().isEmpty());
+        assertEquals(model.getChildrenMap().size(), mapped.getChildrenMap().size());
 
         for (TestChildModel mappedChildModel : mapped.getChildren()) {
             Collection<?> found = model.getChildren().stream().filter(
@@ -399,10 +438,26 @@ public class BMapperTest {
         assertEquals(model.isBool(), view.isViewBool());
         assertEquals(model.getChild().getName(), view.getChildView().getName());
         assertEquals(model.getChild().getName(), view.getChildViewName());
+
+        assertNotNull(view.getViewChildren());
+        assertFalse(view.getViewChildren().isEmpty());
+        assertEquals(model.getChildren().size(), view.getViewChildren().size());
+
+        assertNotNull(view.getViewChildrenMap());
+        assertFalse(view.getViewChildrenMap().isEmpty());
+        assertEquals(model.getChildrenMap().size(), view.getViewChildrenMap().size());
+
         for (TestChildView childView : view.getViewChildren()) {
             Collection<?> found = model.getChildren().stream().filter(
                     childModel -> childModel.getName().equals(childView.getName())).collect(Collectors.toList());
             assertFalse(found.isEmpty());
+        }
+
+        for (Map.Entry<Integer, TestChildView> entry : view.getViewChildrenMap().entrySet()) {
+            Map<Integer, ?> foundEntryModel = model.getChildrenMap().entrySet().stream().filter(modelEntry ->
+                            modelEntry.getKey().equals(entry.getKey()) && modelEntry.getValue().getName().equals(entry.getValue().getName()))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            assertFalse(foundEntryModel.isEmpty());
         }
     }
 

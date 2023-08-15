@@ -2,31 +2,84 @@
 
 ## Contents
 
-* [About library](#about-library)
 * [Initiate](#initiate)
 * [Mapping models](#mapping-models)
-
-## About library
-
 
 ## Initiate
 
 Use BMapperBuilder to build BMapper. The builder provides many tools to configure your mapper.
 
+### Annotation mapping
+
+Passing spring context
 ````
 // Initializing BMapper
 BMapper bMapper = BMapperBuilder
-                .init(MyApplication.class) // Initialize the builder, pass your Main class here
-                .enableXmlMapping() // Enables the xml mapping configuration
-                .disableAnnotationMapping() // Disable mapping through annotation
-                .lazyMappings() // Avoid BMapper to create mappings during project build (use this function if you want to load mappings on another step)
+                .init() // Initialize the builder
+                .enableAnnotationMapping(context) // Enables the annotation mapping configuration
                 .build(); // Build Bmapper object
 
 // Get mapped class
 MyDTO mappedDto = bMapper.map(MyModel, MyDTO.class);
 ````
 
+Passing project main class
+````
+// Initializing BMapper
+BMapper bMapper = BMapperBuilder
+                .init() // Initialize the builder
+                .enableAnnotationMapping(MainClass.class) // Enables the annotation mapping configuration
+                .build(); // Build Bmapper object
+
+// Get mapped class
+MyDTO mappedDto = bMapper.map(MyModel, MyDTO.class);
+````
+
+Passing project root package, or package of annotated classes
+````
+// Initializing BMapper
+BMapper bMapper = BMapperBuilder
+                .init() // Initialize the builder
+                .enableAnnotationMapping("com.bmapper") // Enables the annotation mapping configuration
+                .build(); // Build Bmapper object
+
+// Get mapped class
+MyDTO mappedDto = bMapper.map(MyModel, MyDTO.class);
+````
+
+### XML mapping
+
+````
+// Initializing BMapper
+BMapper bMapper = BMapperBuilder
+                .init() // Initialize the builder
+                .enableXmlMapping() // Enables the XML mapping configuration
+                .build(); // Build Bmapper object
+
+// Get mapped class
+MyDTO mappedDto = bMapper.map(MyModel, MyDTO.class);
+````
+
+### Lazy mapping
+
+BMapper gives the possibility to build the mappings manually when necessary, for that it is necessary to configure the lazy mapping. This will tell mapper which mappings will be created later.
+````
+// Initializing BMapper
+BMapper bMapper = BMapperBuilder
+                .init() // Initialize the builder
+                .lazyMappings() // Do not build mappings automatically
+                .enableAnnotationMapping("com.bmapper") // Enables the annotation mapping configuration
+                .build(); // Build Bmapper object
+````
+
+To load the property mappings manually afterwards, just call the builder method loadMappingProps passing the mapper object itself as a parameter.
+````
+BMapperBuilder.loadMappingProps(bMapper);
+````
+
 ## Mapping models
+
+### Annotation mapping
 
 Library gives to developers a mapping type based on annotations, with that they can map their models while they create it.
 
@@ -43,10 +96,10 @@ public class TestViewExtAnnot {
     @MappingField(name = "child.name")
     private String childViewName;
     
-    @MappingCollection(name = "children", resultElementClass = TestChildView.class)
+    @MappingCollection(name = "children", elementType = TestChildView.class)
     private List<TestChildView> viewChildren = new ArrayList<>();
     
-    @MappingMap(name = "childrenMap", resultValueClass = TestChildView.class)
+    @MappingMap(name = "childrenMap", elementValueType = TestChildView.class)
     private Map<Integer, TestChildView> viewChildrenMap = new HashMap<>();
     
     @MappingField(name = "strExt")
@@ -55,6 +108,8 @@ public class TestViewExtAnnot {
     //Getters and setters
 }
 ````
+
+### XML mapping
 
 You can also map your models through XML files.
 
