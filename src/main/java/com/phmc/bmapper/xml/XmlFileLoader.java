@@ -31,7 +31,7 @@ public class XmlFileLoader {
                     ? className
                     : className + completeXmlFileName;
         } else {
-            completeXmlFileName = "*" + completeXmlFileName;
+            completeXmlFileName = "/**/*" + completeXmlFileName;
         }
 
         try {
