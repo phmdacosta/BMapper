@@ -12,6 +12,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.HashSet;
 import java.util.Set;
@@ -40,16 +41,16 @@ public class XmlFileLoader {
             Set<Document> setXmlDocs = new HashSet<>(resourceFiles.length);
             for (Resource resource : resourceFiles) {
                 try {
-                    File xmlFile = new File(resource.getURL().toURI());
+                    InputStream inputStream = resource.getInputStream();
                     DocumentBuilderFactory xmlBuilderFactory = DocumentBuilderFactory.newInstance();
                     DocumentBuilder xmlBuilder = xmlBuilderFactory.newDocumentBuilder();
-                    Document document = xmlBuilder.parse(xmlFile);
+                    Document document = xmlBuilder.parse(inputStream);
 
                     // Just process files with "bmapper" tag
                     if (XmlSchemaTag.contains(document.getDocumentElement().getNodeName())) {
                         setXmlDocs.add(document);
                     }
-                } catch (URISyntaxException | ParserConfigurationException | SAXException | IOException e) {
+                } catch (Exception e) {
                     Log.error(XmlFileLoader.class, new LoadConfigException(
                             String.format("Could not load XML file %s", resource.getFilename()), e));
                 }
