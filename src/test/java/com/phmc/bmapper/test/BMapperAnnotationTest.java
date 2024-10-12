@@ -52,15 +52,70 @@ public class BMapperAnnotationTest {
 
     @Test
     public void test_modelMapping_commonFields_success() {
-        TestAnnotModel_E_DtoRequest testAnnotModelEDtoRequest = new TestAnnotModel_E_DtoRequest();
-        testAnnotModelEDtoRequest.setTestAnnotModelAId(153L);
-        testAnnotModelEDtoRequest.setVal(6534D);
+        long model_A_ID = 568L;
 
-        TestAnnotModel_E model = bMapper.map(testAnnotModelEDtoRequest, TestAnnotModel_E.class);
-        assertNotNull(model);
-        assertNotNull(model.getTestAnnotModelA());
-        assertEquals(model.getTestAnnotModelA().getId(), testAnnotModelEDtoRequest.getTestAnnotModelAId());
-        assertEquals(model.getValue(), testAnnotModelEDtoRequest.getVal());
+        // TestAnnotModel_B DTO creation
+        TestAnnotModel_B_DtoRequest model_B_Request = new TestAnnotModel_B_DtoRequest();
+        model_B_Request.setName("TestAnnotModel B");
+        model_B_Request.setValue("Value TestAnnotModel B");
+
+        // TestAnnotModel_A DTO creation
+        TestAnnotModel_A_DtoRequest model_A_Request = new TestAnnotModel_A_DtoRequest();
+        model_A_Request.setId(model_A_ID);
+        model_A_Request.setModelAName("Model A");
+        model_A_Request.setStr1("Model A STR");
+        model_A_Request.setTestAnnotModelBList(new ArrayList<>());
+        model_A_Request.getTestAnnotModelBList().add(model_B_Request);
+        model_A_Request.setTestAnnotModelCSet(new HashSet<>());
+
+        // TestAnnotModel_D DTO creation
+        TestAnnotModel_D_DtoRequest model_D_Request = new TestAnnotModel_D_DtoRequest();
+        model_D_Request.setId(model_A_ID);
+        model_D_Request.setName("Model D");
+        model_D_Request.setRoute("ROUTE D");
+        model_D_Request.setTestAnnotModelCList(new ArrayList<>());
+
+        // TestAnnotModel_C DTO creation
+        TestAnnotModel_C_DtoRequest model_C_Request = new TestAnnotModel_C_DtoRequest();
+        model_C_Request.setId(model_A_ID);
+        model_C_Request.setName("Model C");
+        model_C_Request.setTestAnnotModelAList(new ArrayList<>());
+        model_C_Request.getTestAnnotModelAList().add(model_A_Request);
+        model_C_Request.setTestAnnotModelDList(new ArrayList<>());
+        model_C_Request.getTestAnnotModelDList().add(model_D_Request);
+
+        TestAnnotModel_C model_C = bMapper.map(model_C_Request, TestAnnotModel_C.class);
+
+        // Assertions Model C
+        assertNotNull(model_C);
+        assertEquals(model_C_Request.getId(), model_C.getId());
+        assertEquals(model_C_Request.getName(), model_C.getName());
+        assertNotNull(model_C.getTestAnnotModelAList());
+        assertNotEquals(0, model_C.getTestAnnotModelAList().size());
+        assertNotNull(model_C.getTestAnnotModelDList());
+        assertNotEquals(0, model_C_Request.getTestAnnotModelDList().size());
+
+        // Assertions Model A
+        TestAnnotModel_A model_A = model_C.getTestAnnotModelAList().iterator().next();
+        assertEquals(model_A_Request.getId(), model_A.getId());
+        assertEquals(model_A_Request.getModelAName(), model_A.getModelAName());
+        assertEquals(model_A_Request.getStr1(), model_A.getStr1());
+        assertNotNull(model_A.getTestAnnotModelBList());
+        assertNotEquals(0, model_A.getTestAnnotModelBList().size());
+        assertNotNull(model_A.getTestAnnotModelCSet());
+
+        // Assertions Model B
+        TestAnnotModel_B model_B = model_A.getTestAnnotModelBList().iterator().next();
+        assertEquals(model_B_Request.getName(), model_B.getName());
+        assertEquals(model_B_Request.getValue(), model_B.getValue());
+
+        // Assertions Model D
+        TestAnnotModel_D model_D = model_C.getTestAnnotModelDList().iterator().next();
+        assertEquals(model_D_Request.getId(), model_D.getId());
+        assertEquals(model_D_Request.getName(), model_D.getName());
+        assertEquals(model_D_Request.getRoute(), model_D.getRoute());
+        assertNotNull(model_D.getTestAnnotModelCList());
+        assertNotEquals(0, model_D.getTestAnnotModelCList().size());
     }
 
     @Test

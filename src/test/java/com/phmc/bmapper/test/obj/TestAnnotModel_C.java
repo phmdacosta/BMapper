@@ -30,12 +30,12 @@ public class TestAnnotModel_C implements Cloneable {
         this.name = name;
     }
 
-    public List<TestAnnotModel_A> getUsers() {
+    public List<TestAnnotModel_A> getTestAnnotModelAList() {
         return testAnnotModelAList;
     }
 
-    public void setUsers(List<TestAnnotModel_A> testAnnotModelAS) {
-        this.testAnnotModelAList = testAnnotModelAS;
+    public void setTestAnnotModelAList(List<TestAnnotModel_A> testAnnotModelAList) {
+        this.testAnnotModelAList = testAnnotModelAList;
     }
 
     public List<TestAnnotModel_D> getTestAnnotModelDList() {
@@ -63,13 +63,13 @@ public class TestAnnotModel_C implements Cloneable {
         TestAnnotModel_C testAnnotModelAC = (TestAnnotModel_C) o;
         return getId() == testAnnotModelAC.getId()
                 && Objects.equals(getName(), testAnnotModelAC.getName())
-                && Objects.equals(getUsers(), testAnnotModelAC.getUsers())
+                && Objects.equals(getTestAnnotModelAList(), testAnnotModelAC.getTestAnnotModelAList())
                 && Objects.equals(getTestAnnotModelDList(), testAnnotModelAC.getTestAnnotModelDList());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getName(), getUsers(), getTestAnnotModelDList());
+        return Objects.hash(getId(), getName(), getTestAnnotModelAList(), getTestAnnotModelDList());
     }
 
     @Override

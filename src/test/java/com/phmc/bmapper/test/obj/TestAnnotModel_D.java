@@ -39,11 +39,11 @@ public class TestAnnotModel_D implements Cloneable {
         return this;
     }
 
-    public List<TestAnnotModel_C> getRoles() {
+    public List<TestAnnotModel_C> getTestAnnotModelCList() {
         return testAnnotModelACS;
     }
 
-    public TestAnnotModel_D setRoles(List<TestAnnotModel_C> testAnnotModelACS) {
+    public TestAnnotModel_D setTestAnnotModelCList(List<TestAnnotModel_C> testAnnotModelACS) {
         this.testAnnotModelACS = testAnnotModelACS;
         return this;
     }
@@ -56,12 +56,12 @@ public class TestAnnotModel_D implements Cloneable {
         return getId() == that.getId()
                 && Objects.equals(getName(), that.getName())
                 && Objects.equals(getRoute(), that.getRoute())
-                && Objects.equals(getRoles(), that.getRoles());
+                && Objects.equals(getTestAnnotModelCList(), that.getTestAnnotModelCList());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getName(), getRoute(), getRoles());
+        return Objects.hash(getId(), getName(), getRoute(), getTestAnnotModelCList());
     }
 
     @Override
@@ -75,7 +75,7 @@ public class TestAnnotModel_D implements Cloneable {
     public TestAnnotModel_D clone() throws CloneNotSupportedException {
         TestAnnotModel_D clone = (TestAnnotModel_D) super.clone();
         try {
-            clone.setRoles(this.getRoles().stream().map(role -> {
+            clone.setTestAnnotModelCList(this.getTestAnnotModelCList().stream().map(role -> {
                 try {
                     return role.clone();
                 } catch (CloneNotSupportedException e) {
